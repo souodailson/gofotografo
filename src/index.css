@@ -1,0 +1,319 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 100%;
+    --foreground: 210 5% 15%; /* #242c2b */
+
+    --card: 220 20% 100%;
+    --card-foreground: 210 5% 15%;
+ 
+    --popover: 220 20% 100%;
+    --popover-foreground: 210 5% 15%;
+ 
+    --primary: 80 12% 85%; /* #d7dbd4 */
+    --primary-foreground: 210 5% 15%;
+ 
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 210 5% 25%;
+ 
+    --muted: 220 14% 94%;
+    --muted-foreground: 210 5% 45%;
+ 
+    --accent: 220 14% 94%;
+    --accent-foreground: 210 5% 25%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 12% 90%;
+    --input: 220 12% 90%;
+    --ring: 210 5% 15%;
+ 
+    --radius: 0.75rem;
+
+    --button-primary: 80 12% 85%;
+    --button-primary-foreground: 210 5% 15%;
+
+    /* Landing Page Dark Theme Colors */
+    --lp-background: #161616;
+    --lp-foreground: #f4f7f2;
+    --lp-accent: #e1c38f;
+    --lp-heading: #ffffff;
+    --lp-muted: #a1a1aa; /* A slightly muted tone for paragraphs */
+  }
+ 
+  .dark {
+    --background: 0 0% 8.6%; /* #161616 */
+    --foreground: 90 14% 96%; /* #f4f7f2 */
+ 
+    --card: 0 0% 8.6%; /* #161616 */
+    --card-foreground: 90 14% 96%;
+ 
+    --popover: 0 0% 8.6%; /* #161616 */
+    --popover-foreground: 90 14% 96%;
+ 
+    --primary: 80 12% 85%;
+    --primary-foreground: 90 14% 96%;
+ 
+    --secondary: 0 0% 8.6%;
+    --secondary-foreground: 90 14% 96%;
+ 
+    --muted: 0 0% 12%; /* Um pouco mais claro para contraste sutil */
+    --muted-foreground: 210 5% 65%;
+ 
+    --accent: 0 0% 12%;
+    --accent-foreground: 90 14% 96%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+ 
+    --border: 210 5% 15%;
+    --input: 210 5% 15%;
+    --ring: 80 12% 85%;
+
+    --button-primary: 80 12% 85%;
+    --button-primary-foreground: 210 5% 15%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  *:focus, *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  input:focus-visible, textarea:focus-visible {
+    @apply ring-2 ring-ring ring-offset-2;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.titulo-gradiente-animado {
+  background-image: linear-gradient(120deg, #c7a774 0%, #232b2d 50%, #c7a774 100%);
+  background-size: 200% 200%;
+  animation: gradient-x 5s ease infinite;
+  @apply bg-clip-text text-transparent;
+}
+
+.dark .titulo-gradiente-animado {
+  background-image: linear-gradient(120deg, #e1c38f 0%, #ffffff 50%, #e1c38f 100%);
+}
+
+.titulo-gradiente-lp {
+  background-image: linear-gradient(120deg, #e1c38f 0%, #ffffff 50%, #e1c38f 100%);
+  background-size: 200% 200%;
+  animation: gradient-x 5s ease infinite;
+  @apply bg-clip-text text-transparent;
+}
+
+@keyframes gradient-x {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.fundo-quadro-ativo {
+  position: relative;
+  z-index: 10;
+}
+
+.imagem-fundo-quadro {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.btn-custom-gradient {
+  @apply bg-button-primary text-button-primary-foreground hover:bg-button-primary/90;
+}
+
+.custo-base-borda-animada {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: transparent;
+}
+
+.custo-base-borda-animada::before {
+  content: '';
+  display: none;
+}
+
+.jiggle-animation {
+  animation: jiggle 0.4s ease-in-out infinite;
+}
+
+.pagina-quadros, .main-content-container .h-full, .main-content-container {
+  background-color: transparent !important;
+}
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.main-content-container {
+    transition: margin-left 0.3s ease-in-out, padding 0.3s ease-in-out;
+}
+
+[data-rbd-draggable-is-dragging="true"] {
+  z-index: 9999 !important;
+}
+
+@keyframes jiggle {
+  0%, 100% { transform: rotate(-0.5deg); }
+  50% { transform: rotate(0.5deg); }
+}
+
+.prose img {
+  border-radius: 0.5rem;
+}
+
+/* Mobile Specific Adjustments */
+@media (max-width: 640px) {
+  .dashboard-greeting-container h1,
+  .dashboard-greeting-container .dashboard-subtitle {
+    display: none;
+  }
+
+  .dashboard-header-container {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .dashboard-controls-container {
+    margin-left: auto;
+  }
+
+  .dashboard-personalize-button {
+    position: fixed;
+    bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    right: 1rem;
+    z-index: 400;
+  }
+
+  .mobile-header {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    height: auto;
+  }
+}
+
+/* Day Picker Customizations */
+.rdp {
+    --rdp-cell-size: 36px;
+    --rdp-accent-color: hsl(var(--primary));
+    --rdp-background-color: hsl(var(--primary) / 0.1);
+    --rdp-accent-color-dark: hsl(var(--primary));
+    --rdp-background-color-dark: hsl(var(--primary) / 0.2);
+    --rdp-selected-color: hsl(var(--primary-foreground));
+}
+
+.dark .rdp {
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-background-color: hsl(var(--primary) / 0.2);
+  --rdp-selected-color: hsl(var(--button-primary-foreground));
+}
+
+.rdp-day_today:not(.rdp-day_selected) {
+    color: hsl(var(--primary));
+    font-weight: bold;
+}
+
+/* Tiptap Editor Styles */
+.ProseMirror {
+  min-height: 150px;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  margin: 0;
+  overflow: hidden;
+  table-layout: fixed;
+  width: 100%;
+}
+.ProseMirror td,
+.ProseMirror th {
+  border: 2px solid #ced4da;
+  box-sizing: border-box;
+  min-width: 1em;
+  padding: 3px 5px;
+  position: relative;
+  vertical-align: top;
+}
+.ProseMirror th {
+  background-color: #f1f3f5;
+  font-weight: bold;
+  text-align: left;
+}
+.ProseMirror .selectedCell:after {
+  background: rgba(200, 200, 255, 0.4);
+  content: '';
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+.ProseMirror .column-resize-handle {
+  background-color: #adf;
+  bottom: -2px;
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 4px;
+  pointer-events: none;
+}
+.ProseMirror p {
+  margin: 0;
+}
+
+
+/* Z-index fixes for Studio Editor */
+.app-toolbar {
+  position: relative;
+  z-index: 10;
+}
+
+.studio-sidebar {
+  position: relative;
+  z-index: 20;
+}
+
+.studio-editor-container {
+  position: relative;
+  z-index: 15;
+}

@@ -1,0 +1,30 @@
+import React from 'react';
+import sanitizeHtml from '@/utils/sanitizeHtml';
+
+const BlockRenderer = ({ block, isSelected, updateBlock, setSelectedBlock }) => {
+  const { type, content } = block;
+
+  const handleTextBlur = (e) => {
+    updateBlock(block.id, { ...block, content: { ...content, text: e.target.innerText } });
+  };
+
+  switch (type) {
+    case 'text':
+      const Tag = content.level || 'p';
+      return (
+        <Tag
+          key={block.id}
+          className={`canvas-${Tag} w-full h-full p-2`}
+          style={{ color: content.color || 'inherit', fontSize: content.fontSize || '1rem' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.text) }}
+          contentEditable={isSelected && !block.locked}
+          suppressContentEditableWarning
+          onBlur={handleTextBlur}
+        />
+      );
+    default:
+      return null;
+  }
+};
+
+export default BlockRenderer;

@@ -1,0 +1,1 @@
+export const parsePercentage = (value) => parseFloat(value) || 0;

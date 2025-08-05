@@ -1,0 +1,58 @@
+export const formTemplates = {
+  client_registration: {
+    title: "Cadastro de Cliente",
+    description: "Formulário para coletar informações básicas de novos clientes.",
+    questions: [
+      { question_text: "Nome completo", question_type: "short_text", is_required: true, maps_to_field: "name" },
+      { question_text: "E-mail", question_type: "email", is_required: true, maps_to_field: "email" },
+      { question_text: "Telefone com WhatsApp", question_type: "phone", is_required: true, maps_to_field: "phone" },
+      { question_text: "Tipo de ensaio ou evento", question_type: "short_text", is_required: false },
+      { question_text: "Data do evento (se houver)", question_type: "short_text", is_required: false },
+      { question_text: "Local do evento (cidade/bairro)", question_type: "short_text", is_required: false },
+      { question_text: "Como chegou até mim?", question_type: "short_text", is_required: false },
+      { question_text: "Observações adicionais", question_type: "long_text", is_required: false },
+    ],
+  },
+  client_and_briefing: {
+    title: "Cadastro + Briefing",
+    description: "Combine o cadastro do cliente com um briefing detalhado.",
+    questions: [
+      { question_text: "Nome completo", question_type: "short_text", is_required: true, maps_to_field: "name" },
+      { question_text: "E-mail", question_type: "email", is_required: true, maps_to_field: "email" },
+      { question_text: "WhatsApp", question_type: "phone", is_required: true, maps_to_field: "phone" },
+      { question_text: "Data do evento/ensaio", question_type: "short_text", is_required: true },
+      { question_text: "Local (cidade/bairro)", question_type: "short_text", is_required: false },
+      { question_text: "Tipo de ensaio (ex: casal, gestante, aniversário)", question_type: "short_text", is_required: true },
+      { question_text: "Objetivo do ensaio", question_type: "long_text", is_required: false },
+      { question_text: "Estilo preferido de fotos (espontâneo, clássicas, etc.)", question_type: "short_text", is_required: false },
+      { question_text: "Sugestão de roupas ou cores", question_type: "long_text", is_required: false },
+      { question_text: "Link de pastinha do Pinterest (se tiver)", question_type: "short_text", is_required: false },
+      { question_text: "Observações extras", question_type: "long_text", is_required: false },
+    ],
+  },
+  lead_campaign: {
+    title: "Campanha de Leads",
+    description: "Formulário rápido para capturar leads em campanhas de marketing.",
+    questions: [
+      { question_text: "Nome completo", question_type: "short_text", is_required: true, maps_to_field: "name" },
+      { question_text: "WhatsApp", question_type: "phone", is_required: true, maps_to_field: "phone" },
+      { question_text: "E-mail", question_type: "email", is_required: true, maps_to_field: "email" },
+      { question_text: "Tipo de ensaio que você quer", question_type: "short_text", is_required: false },
+      { question_text: "Cidade / região", question_type: "short_text", is_required: false },
+      { question_text: "Quando pretende fazer o ensaio?", question_type: "short_text", is_required: false },
+    ],
+  },
+  feedback: {
+    title: "Pesquisa de Feedback",
+    description: "Receba feedbacks construtivos dos seus clientes.",
+    questions: [
+      { question_text: "Nome (opcional)", question_type: "short_text", is_required: false },
+      { question_text: "Qual foi o tipo do seu ensaio/evento?", question_type: "short_text", is_required: true },
+      { question_text: "Como você avalia sua experiência geral? (1 a 5 estrelas)", question_type: "short_text", is_required: true },
+      { question_text: "O que mais gostou no serviço?", question_type: "long_text", is_required: true },
+      { question_text: "Algo que podemos melhorar?", question_type: "long_text", is_required: false },
+      { question_text: "Você indicaria meu trabalho para alguém?", question_type: "short_text", is_required: false },
+      { question_text: "Podemos usar esse feedback em nossas redes sociais?", question_type: "short_text", is_required: false },
+    ],
+  },
+};
