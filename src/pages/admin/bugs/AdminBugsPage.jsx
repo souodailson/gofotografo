@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { duotoneDark } from 'react-syntax-highlighter/dist/esm/styles/prism/duotone-dark';
+import duotoneDark from 'react-syntax-highlighter/dist/esm/styles/prism/duotone-dark';
 const statusColors = {
   'Aberto': 'bg-red-500',
   'Em análise': 'bg-yellow-500',
