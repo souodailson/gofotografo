@@ -7,7 +7,7 @@ const WorkflowModalHistory = ({ history }) => {
       {history && history.length > 0 ? (
         history.slice().reverse().map((entry, index) => ( 
           <div key={index} className="flex items-start space-x-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg shadow-sm">
-            <div className="mt-1 w-2.5 h-2.5 bg-purple-500 rounded-full flex-shrink-0" />
+            <div className="mt-1 w-2.5 h-2.5 bg-orange-300 rounded-full flex-shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{entry.action}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">

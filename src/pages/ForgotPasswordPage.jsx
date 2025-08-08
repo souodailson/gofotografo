@@ -100,7 +100,7 @@ const ForgotPasswordPage = () => {
       {!messageSent && (
         <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
           Lembrou a senha?{' '}
-          <Link to="/login" className="font-medium text-purple-600 hover:text-purple-500 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+          <Link to="/login" className="font-medium text-neutral-600 hover:text-purple-500 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
             Faça login
           </Link>
         </p>

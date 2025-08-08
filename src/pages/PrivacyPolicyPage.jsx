@@ -7,8 +7,8 @@ import { ArrowLeft, Mail, ShieldCheck } from 'lucide-react';
 const Header = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const logoUrlLightTheme = "https://i.imgur.com/dykyBO9.png"; 
-  const logoUrlDarkTheme = "https://i.imgur.com/NUAO4d4.png";
+  const logoUrlLightTheme = "https://rouvkvcngmsquebokdyg.supabase.co/storage/v1/object/public/gofiles//logotipo%20gofotografo%20claro.png"; 
+  const logoUrlDarkTheme = "https://rouvkvcngmsquebokdyg.supabase.co/storage/v1/object/public/gofiles//logotipo%20gofotografo%20claro.png";
   const displayLogo = theme === 'dark' ? logoUrlDarkTheme : logoUrlLightTheme;
 
   return (

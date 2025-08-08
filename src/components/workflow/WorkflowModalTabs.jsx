@@ -18,7 +18,7 @@ const WorkflowModalTabs = ({ activeTab, setActiveTab, cardId, subtasksCount, com
           key={tab.id}
           onClick={() => setActiveTab(tab.id)} 
           className={`px-4 sm:px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === tab.id 
-            ? 'text-purple-600 border-b-2 border-purple-600' 
+            ? 'text-neutral-600 border-b-2 border-neutral-600' 
             : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
         >
           {tab.label}

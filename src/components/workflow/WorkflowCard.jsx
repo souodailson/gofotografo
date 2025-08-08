@@ -380,7 +380,7 @@ const WorkflowCard = ({
             <Button
               variant="link"
               size="sm"
-              className="p-0 h-auto text-xs text-purple-600 dark:text-purple-400"
+              className="p-0 h-auto text-xs text-neutral-600 dark:text-purple-400"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowSubtasks(!showSubtasks);

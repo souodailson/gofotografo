@@ -173,7 +173,7 @@ const ProposalEditorPage = ({ isAdmin = false }) => {
                 setSnapLines={setSnapLines}
               />
                {snapLines.map((line, index) => (
-                <div key={index} className="absolute bg-purple-500" style={{ ...(line.type === 'vertical' ? { left: line.position, top: 0, width: '1px', height: '100%' } : { top: line.position, left: 0, height: '1px', width: '100%' }), zIndex: 99998 }}/>
+                <div key={index} className="absolute bg-orange-300" style={{ ...(line.type === 'vertical' ? { left: line.position, top: 0, width: '1px', height: '100%' } : { top: line.position, left: 0, height: '1px', width: '100%' }), zIndex: 99998 }}/>
               ))}
             </div>
           </div>

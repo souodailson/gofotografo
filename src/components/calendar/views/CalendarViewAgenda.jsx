@@ -48,7 +48,7 @@ const CalendarViewAgenda = ({ combinedEvents, onEventClick }) => {
                 >
                   <div className="flex items-center space-x-3">
                     <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                      event.isGoogleEvent ? 'bg-blue-500' : 'bg-purple-500'
+                      event.isGoogleEvent ? 'bg-blue-500' : 'bg-orange-300'
                     }`} />
                     
                     <div className="flex-grow">

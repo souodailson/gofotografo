@@ -63,7 +63,7 @@ const FeatureCard = ({ icon, title, description, delay }) => (
 
 const Footer = () => {
     const navigate = useNavigate();
-    const logoUrlDarkTheme = "https://i.imgur.com/uG5s9s9.png"; 
+    const logoUrlDarkTheme = "https://rouvkvcngmsquebokdyg.supabase.co/storage/v1/object/public/gofiles//logotipo%20gofotografo%20claro.png"; 
 
     return (
         <footer className="bg-white/5 border-t border-white/10 mt-24">

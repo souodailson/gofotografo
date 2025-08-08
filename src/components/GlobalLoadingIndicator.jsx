@@ -3,8 +3,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 const GlobalLoadingIndicator = () => {
   const { theme } = useTheme();
-  const logoUrlDarkTheme = "https://i.imgur.com/NUAO4d4.png";
-  const logoUrlLightTheme = "https://i.imgur.com/dykyBO9.png";
+  const logoUrlDarkTheme = "https://rouvkvcngmsquebokdyg.supabase.co/storage/v1/object/public/gofiles//logotipo%20gofotografo%20claro.png";
+  const logoUrlLightTheme = "https://rouvkvcngmsquebokdyg.supabase.co/storage/v1/object/public/gofiles//logotipo%20gofotografo%20claro.png";
   
   return (
     <div className="flex items-center justify-center h-screen bg-background">

@@ -180,7 +180,7 @@ const WorkflowCard = ({ card, onEdit, onUpdateSubtask, onAddSubtask, onDeleteSub
         </div>
         
         <div className="mb-3">
-          <Button variant="link" size="sm" className="p-0 h-auto text-xs text-purple-600 dark:text-purple-400" onClick={(e) => {e.stopPropagation(); setShowSubtasks(!showSubtasks);}}>
+          <Button variant="link" size="sm" className="p-0 h-auto text-xs text-neutral-600 dark:text-purple-400" onClick={(e) => {e.stopPropagation(); setShowSubtasks(!showSubtasks);}}>
             {showSubtasks ? 'Ocultar' : 'Mostrar'} Subtarefas ({card.subtasks?.length || 0})
           </Button>
           {showSubtasks && (

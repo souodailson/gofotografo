@@ -67,7 +67,7 @@ const ClientHistory = ({ clientId }) => {
       case 'concluido': return 'bg-green-500 hover:bg-green-600';
       case 'agendado': return 'bg-blue-500 hover:bg-blue-600';
       case 'em-andamento': return 'bg-yellow-500 text-black hover:bg-yellow-600';
-      case 'proposta-enviada': return 'bg-purple-500 hover:bg-purple-600';
+      case 'proposta-enviada': return 'bg-orange-300 hover:bg-purple-600';
       case 'novo-lead': return 'bg-pink-500 hover:bg-pink-600';
       default: return 'bg-gray-500 hover:bg-gray-600';
     }

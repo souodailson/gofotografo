@@ -183,7 +183,7 @@ const Reports = () => {
               { label: "Lucro Operacional", value: `R$ ${quickStats.operationalProfit.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, color: quickStats.operationalProfit >= 0 ? "text-sky-500 dark:text-sky-400" : "text-orange-500" },
               { label: "Pró-labore", value: `R$ ${quickStats.totalProLabore.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, color: "text-amber-500 dark:text-amber-400" },
               { label: "Lucro Líquido Final", value: `R$ ${quickStats.netProfit.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, color: quickStats.netProfit >= 0 ? "text-blue-600 dark:text-blue-400" : "text-orange-500" },
-              { label: "Projetos Concluídos", value: quickStats.completedProjects, color: "text-purple-600 dark:text-purple-400" },
+              { label: "Projetos Concluídos", value: quickStats.completedProjects, color: "text-neutral-600 dark:text-purple-400" },
               { label: "Novos Clientes", value: quickStats.newClients, color: "text-pink-600 dark:text-pink-400" },
             ].map(stat => (
               <div key={stat.label} className="text-center bg-background p-4 rounded-lg border border-border">
