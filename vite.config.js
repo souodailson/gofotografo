@@ -1,45 +1,40 @@
+// vite.config.js
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
-import { createLogger, defineConfig } from 'vite';
+import { defineConfig } from 'vite';
 
-const logger = createLogger();
-const loggerError = logger.error;
-
-logger.error = (msg, options) => {
-  if (options?.error?.toString().includes('CssSyntaxError: [postcss]')) {
-    return;
-  }
-  loggerError(msg, options);
-};
-
-console.warn = () => {};
+const mutePostCssCssSyntaxError = () => ({
+  name: 'mute-postcss-css-syntax',
+  configureServer(server) {
+    const loggerError = server.config.logger.error;
+    server.config.logger.error = (msg, opts) => {
+      if (opts?.error?.toString?.().includes('CssSyntaxError: [postcss]')) return;
+      loggerError(msg, opts);
+    };
+  },
+});
 
 export default defineConfig({
-  customLogger: logger,
-  plugins: [
-    react(),
-  ],
-  server: {
-    cors: true,
-    headers: {
-      'Cross-Origin-Embedder-Policy': 'credentialless',
-    },
-    allowedHosts: true,
-  },
+  plugins: [react(), mutePostCssCssSyntaxError()],
   resolve: {
-    extensions: ['.jsx', '.js', '.tsx', '.ts', '.json'],
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  build: {
-    rollupOptions: {
-      external: [
-        '@babel/parser',
-        '@babel/traverse',
-        '@babel/generator',
-        '@babel/types',
-      ],
+  server: {
+    port: 3000,
+  },
+  // Para o "dependency scan" do Vite
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: { '.js': 'jsx' },
     },
+  },
+  // Para a transformação normal de arquivos do src
+  esbuild: {
+    loader: 'jsx',
+    // garante que .js do src sejam tratados como JSX
+    include: /src\/.*\.(js|jsx)$/,
+    exclude: [],
   },
 });

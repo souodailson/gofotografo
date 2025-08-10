@@ -10,10 +10,9 @@ import AppContent from '@/components/AppContent';
 import AdminProtectedRoute from '@/pages/admin/AdminProtectedRoute';
 import PWAInstaller from '@/components/PWAInstaller';
 import FullScreenLoader from '@/components/FullScreenLoader';
-import KeepAlive from '@/components/KeepAlive';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import KeepAlive from '@/components/KeepAlive.jsx';
+import ErrorBoundary from '@/components/ErrorBoundary.jsx';
 import GlobalNotifications from '@/components/GlobalNotifications';
-
 
 const LandingPage = lazy(() => import('@/pages/LandingPage'));
 const PrivacyPolicyPage = lazy(() => import('@/pages/PrivacyPolicyPage'));
@@ -42,8 +41,10 @@ const EditorLayout = ({ children }) => {
 
 const MainLayout = () => {
   const location = useLocation();
-  const isEditorRoute = location.pathname.startsWith('/studio/proposals/edit/') || location.pathname === '/studio/proposals/new';
-  
+  const isEditorRoute =
+    location.pathname.startsWith('/studio/proposals/edit/') ||
+    location.pathname === '/studio/proposals/new';
+
   return (
     <ProtectedRoute>
       <AppContent hideSidebar={isEditorRoute}>
@@ -56,24 +57,122 @@ const MainLayout = () => {
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/lp" element={<Suspense fallback={<FullScreenLoader />}><LandingPage /></Suspense>} />
-      <Route path="/politica-de-privacidade-e-dados" element={<Suspense fallback={<FullScreenLoader />}><PrivacyPolicyPage /></Suspense>} />
-      <Route path="/login" element={<Suspense fallback={<FullScreenLoader />}><LoginPage /></Suspense>} />
-      <Route path="/signup" element={<Suspense fallback={<FullScreenLoader />}><SignupPage /></Suspense>} />
-      <Route path="/forgot-password" element={<Suspense fallback={<FullScreenLoader />}><ForgotPasswordPage /></Suspense>} />
-      <Route path="/update-password" element={<Suspense fallback={<FullScreenLoader />}><UpdatePasswordPage /></Suspense>} />
-      <Route path="/f/:formId" element={<Suspense fallback={<FullScreenLoader />}><PublicFormPage /></Suspense>} />
-      <Route path="/agendar/:bookingLinkId" element={<Suspense fallback={<FullScreenLoader />}><PublicBookingPage /></Suspense>} />
-      
-      <Route path="/p/:slug" element={<Suspense fallback={<FullScreenLoader />}><ProposalPublicView /></Suspense>} />
+      <Route
+        path="/lp"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <LandingPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/politica-de-privacidade-e-dados"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <PrivacyPolicyPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <LoginPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <SignupPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <ForgotPasswordPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/update-password"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <UpdatePasswordPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/f/:formId"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <PublicFormPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/agendar/:bookingLinkId"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <PublicBookingPage />
+          </Suspense>
+        }
+      />
 
-      <Route path="/webhooks/assinafy" element={<Suspense fallback={<FullScreenLoader />}><AssinafyWebhookPage /></Suspense>} />
-      <Route path="/manutencao" element={<Suspense fallback={<FullScreenLoader />}><MaintenancePage /></Suspense>} />
-      <Route path="/blog" element={<Suspense fallback={<FullScreenLoader />}><BlogPage /></Suspense>} />
-      <Route path="/blog/:slug" element={<Suspense fallback={<FullScreenLoader />}><BlogPostPage /></Suspense>} />
-      
-      <Route path="/control-acess/login" element={<Suspense fallback={<FullScreenLoader />}><AdminLoginPage /></Suspense>} />
-      <Route 
+      <Route
+        path="/p/:slug"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <ProposalPublicView />
+          </Suspense>
+        }
+      />
+
+      <Route
+        path="/webhooks/assinafy"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <AssinafyWebhookPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/manutencao"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <MaintenancePage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/blog"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <BlogPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/blog/:slug"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <BlogPostPage />
+          </Suspense>
+        }
+      />
+
+      <Route
+        path="/control-acess/login"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <AdminLoginPage />
+          </Suspense>
+        }
+      />
+      <Route
         path="/control-acess/*"
         element={
           <AdminProtectedRoute>
@@ -81,26 +180,96 @@ const AppRoutes = () => {
               <AdminLayout />
             </Suspense>
           </AdminProtectedRoute>
-        } 
+        }
       />
 
-      <Route path="/sobre" element={<Suspense fallback={<FullScreenLoader />}><CustomPageViewer slug="sobre" /></Suspense>} />
-      <Route path="/fale-conosco" element={<Suspense fallback={<FullScreenLoader />}><CustomPageViewer slug="fale-conosco" /></Suspense>} />
-      <Route path="/tutoriais" element={<Suspense fallback={<FullScreenLoader />}><TutorialsPage /></Suspense>} />
-      <Route path="/tutoriais/:slug" element={<Suspense fallback={<FullScreenLoader />}><CustomPageViewer isTutorial={true} /></Suspense>} />
-      
-      <Route path="/studio/proposals/new" element={<EditorLayout><Suspense fallback={<FullScreenLoader />}><ProposalEditorPage /></Suspense></EditorLayout>} />
-      <Route path="/studio/proposals/edit/:proposalId" element={<EditorLayout><Suspense fallback={<FullScreenLoader />}><ProposalEditorPage /></Suspense></EditorLayout>} />
-       <Route path="/studio/contracts/new" element={<EditorLayout><Suspense fallback={<FullScreenLoader />}><ContractEditorPage mode="new" /></Suspense></EditorLayout>} />
-      <Route path="/studio/contracts/edit/:contractId" element={<EditorLayout><Suspense fallback={<FullScreenLoader />}><ContractEditorPage mode="edit" /></Suspense></EditorLayout>} />
-      
+      <Route
+        path="/sobre"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <CustomPageViewer slug="sobre" />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/fale-conosco"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <CustomPageViewer slug="fale-conosco" />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/tutoriais"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <TutorialsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/tutoriais/:slug"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <CustomPageViewer isTutorial={true} />
+          </Suspense>
+        }
+      />
+
+      <Route
+        path="/studio/proposals/new"
+        element={
+          <EditorLayout>
+            <Suspense fallback={<FullScreenLoader />}>
+              <ProposalEditorPage />
+            </Suspense>
+          </EditorLayout>
+        }
+      />
+      <Route
+        path="/studio/proposals/edit/:proposalId"
+        element={
+          <EditorLayout>
+            <Suspense fallback={<FullScreenLoader />}>
+              <ProposalEditorPage />
+            </Suspense>
+          </EditorLayout>
+        }
+      />
+      <Route
+        path="/studio/contracts/new"
+        element={
+          <EditorLayout>
+            <Suspense fallback={<FullScreenLoader />}>
+              <ContractEditorPage mode="new" />
+            </Suspense>
+          </EditorLayout>
+        }
+      />
+      <Route
+        path="/studio/contracts/edit/:contractId"
+        element={
+          <EditorLayout>
+            <Suspense fallback={<FullScreenLoader />}>
+              <ContractEditorPage mode="edit" />
+            </Suspense>
+          </EditorLayout>
+        }
+      />
+
       <Route path="/*" element={<MainLayout />}>
-        <Route path="*" element={<Suspense fallback={<FullScreenLoader />}><Outlet /></Suspense>} />
+        <Route
+          path="*"
+          element={
+            <Suspense fallback={<FullScreenLoader />}>
+              <Outlet />
+            </Suspense>
+          }
+        />
       </Route>
     </Routes>
   );
 };
-
 
 function App() {
   return (
@@ -124,7 +293,5 @@ function App() {
     </Router>
   );
 }
-
-
 
 export default App;

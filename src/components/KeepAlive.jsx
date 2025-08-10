@@ -1,46 +1,44 @@
-import React, { useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/contexts/authContext';
+// src/components/KeepAlive.jsx
+import React, { useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/contexts/authContext.jsx";
 
-const KeepAlive = () => {
+export default function KeepAlive() {
   const { user } = useAuth();
+  const intervalRef = useRef(null);
 
   useEffect(() => {
-    const keepAliveInterval = 240000; // 4 minutos
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (!user) return;
+
+    const keepAliveInterval = 240000; // 4 min
 
     const ping = async () => {
-      if (!user) {
-        console.log('KeepAlive: Usuário não logado, ping ignorado.');
-        return;
-      }
-
       try {
-        // Ping leve para manter a instância ativa
         const { error } = await supabase
-          .from('settings')
-          .select('user_id')
-          .eq('user_id', user.id)
+          .from("settings")
+          .select("user_id", { count: "exact", head: true })
+          .eq("user_id", user.id)
           .limit(1);
-
-        if (error) {
-          console.warn('KeepAlive: Ping falhou (silenciosamente). Erro:', error.message);
-        } else {
-          console.log(`KeepAlive: Ping realizado com sucesso às ${new Date().toLocaleTimeString()}`);
-        }
-      } catch (error) {
-        console.warn('KeepAlive: Erro na execução do ping.', error);
+        if (error) console.warn("KeepAlive: ping falhou:", error.message);
+      } catch (e) {
+        console.warn("KeepAlive: erro no ping:", e);
       }
     };
 
-    const intervalId = setInterval(ping, keepAliveInterval);
+    ping();
+    intervalRef.current = setInterval(ping, keepAliveInterval);
 
-    // Limpa o intervalo quando o componente é desmontado
     return () => {
-      clearInterval(intervalId);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
-  }, [user]);
+  }, [user?.id]);
 
-  return null; // Este componente não renderiza nada
-};
-
-export default KeepAlive;
+  return null;
+}
