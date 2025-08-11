@@ -33,7 +33,7 @@ export const addWorkflowCard = async (supabaseClient, userId, card, userName) =>
 
 export const updateWorkflowCard = async (supabaseClient, userId, id, updates, currentCard, getStatusLabelFn, userName) => {
   if (!currentCard) {
-    console.warn(`Tentativa de atualizar card ${id} que não foi encontrado no estado local.`);
+    // Card não encontrado no estado local - tentando fallback
     const { data: fallbackCard, error: fetchError } = await supabaseClient.from('workflow_cards').select('*').eq('id', id).single();
     if (fetchError || !fallbackCard) {
         throw new Error(`Card com ID ${id} não encontrado para atualização, nem no estado local nem no banco de dados.`);

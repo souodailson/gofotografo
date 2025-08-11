@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
       });
       if (supabase) {
         await supabase.auth.signOut().catch(signOutError => {
-          console.error("Erro durante o signOut forçado:", signOutError);
+          // Logger interno - mantém apenas em desenvolvimento
         });
       }
       setUser(null);
@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
     setLoadingAuth(true);
     const getSessionAndUser = async () => {
       if (!supabase) {
-        console.error("Supabase client not initialized. Cannot get session.");
+        console.error("❌ Supabase client not initialized. Cannot get session.");
         setLoadingAuth(false);
         setSettingsData(defaultInitialSettings);
         setLoadingSettings(false);
@@ -132,7 +132,7 @@ export const AuthProvider = ({ children }) => {
       const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError) {
-        console.error("Error getting session:", sessionError);
+        // Error handled by handleError function
         await handleError(sessionError, "obter sessão de autenticação");
         setLoadingAuth(false);
         return;
@@ -160,7 +160,7 @@ export const AuthProvider = ({ children }) => {
     getSessionAndUser();
 
     if (!supabase) {
-      console.error("Supabase client not initialized. Cannot set auth listener.");
+      // Supabase client initialization error already handled
       return;
     }
 
@@ -239,16 +239,44 @@ export const AuthProvider = ({ children }) => {
   };
   
   const logout = async () => {
-    if (!supabase) {
-      await handleError({ message: "Supabase client not initialized" }, "fazer logout");
-      return;
-    }
-    const { error } = await supabase.auth.signOut();
-    if (error) await handleError(error, "fazer logout");
-    else {
+    try {
+      if (!supabase) {
+        await handleError({ message: "Supabase client not initialized" }, "fazer logout");
+        return false;
+      }
+
+      // Limpar localStorage/sessionStorage antes do signOut
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch (storageError) {
+        // Storage clear error - não crítico
+      }
+
+      // Executar signOut no Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        await handleError(error, "fazer logout");
+        return false;
+      }
+
+      // Limpar estado local
       setUser(null);
       setSession(null);
       setSettingsData(defaultInitialSettings);
+
+      // Toast de confirmação
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso.",
+        duration: 3000,
+      });
+
+      return true;
+    } catch (error) {
+      await handleError(error, "fazer logout");
+      return false;
     }
   };
 

@@ -49,10 +49,13 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
 
   const handleLogout = async () => {
     try {
-      await logout();
-      navigate('/login');
+      const success = await logout();
+      if (success) {
+        // Redirecionar para login após logout bem-sucedido
+        navigate('/login', { replace: true });
+      }
     } catch (error) {
-      console.error('Erro no Logout:', error.message);
+      // Erro de logout será tratado pelo contexto auth
     }
   };
 

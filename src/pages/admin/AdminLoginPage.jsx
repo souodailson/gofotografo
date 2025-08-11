@@ -60,7 +60,7 @@ const AdminLoginPage = () => {
       }
 
     } catch (error) {
-      console.error("Admin login error:", error);
+      // Admin login error - detalhes sensíveis não expostos
       let displayMessage = "Credenciais de administrador inválidas ou erro inesperado.";
       if (error.message.includes("privilégios de administrador")) {
         displayMessage = error.message;

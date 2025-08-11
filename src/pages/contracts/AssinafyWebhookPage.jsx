@@ -9,7 +9,7 @@ const AssinafyWebhookPage = () => {
   useEffect(() => {
     const handleWebhook = async (payload) => {
       if (!payload || !payload.id || !payload.status) {
-        console.error("Webhook payload inválido recebido da Assinafy.");
+        // Webhook payload inválido - erro tratado silenciosamente
         return;
       }
       
@@ -22,7 +22,7 @@ const AssinafyWebhookPage = () => {
         .single();
         
       if (fetchError || !contract) {
-        console.error(`Contrato com ID Assinafy ${assinafyDocId} não encontrado no sistema.`);
+        // Contrato não encontrado - erro interno
         return;
       }
       
@@ -40,9 +40,9 @@ const AssinafyWebhookPage = () => {
         .eq('id', contract.id);
         
       if (updateError) {
-        console.error(`Erro ao atualizar o status do contrato ${contract.id}:`, updateError.message);
+        // Erro de atualização do contrato
       } else {
-        console.log(`Contrato ${contract.id} atualizado para o status: ${status}.`);
+        // Contrato atualizado com sucesso
       }
     };
 
@@ -50,7 +50,7 @@ const AssinafyWebhookPage = () => {
       // Esta página é apenas um placeholder para a rota.
       // A lógica real é tratada na Edge Function 'assinafy-webhook-handler'.
       // O código aqui é para demonstrar o que aconteceria se o webhook fosse tratado no cliente.
-      console.log("Página de webhook acessada. A lógica real está na Edge Function. Redirecionando...");
+      // Redirecionamento para dashboard
       
       // Simulação de recebimento de payload para fins de exemplo
       // Em um cenário real, isso viria de uma requisição POST para a Edge Function
@@ -60,7 +60,7 @@ const AssinafyWebhookPage = () => {
               const parsedPayload = JSON.parse(decodeURIComponent(examplePayload));
               await handleWebhook(parsedPayload);
           } catch(e) {
-              console.error("Erro ao processar payload de exemplo:", e);
+              // Erro ao processar exemplo de payload
           }
       }
       

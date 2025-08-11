@@ -101,7 +101,7 @@ export const getTransactionsByWorkflowId = async (supabaseClient, workflowId) =>
     .select('*')
     .eq('trabalho_id', workflowId);
   if (error) {
-    console.error("Erro ao buscar transações por workflow_id:", error);
+    // Erro ao buscar transações - retorna array vazio
     return [];
   }
   return data;

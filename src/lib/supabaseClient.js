@@ -1,36 +1,67 @@
 // src/lib/supabaseClient.js
 import { createClient } from '@supabase/supabase-js';
+import { getValidatedEnv, isDevelopmentEnv } from './envValidation.js';
 
-// Use .env do Vite se existir (recomendado)
-const VITE_URL = import.meta?.env?.VITE_SUPABASE_URL;
-const VITE_ANON = import.meta?.env?.VITE_SUPABASE_ANON_KEY;
+// Singleton para o cliente Supabase
+let _client = null;
 
-// Fallback para os valores que você já tinha
-const FALLBACK_URL = 'https://rouvkvcngmsquebokdyg.supabase.co';
-const FALLBACK_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdXZrdmNuZ21zcXVlYm9rZHlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk4NDM3MzIsImV4cCI6MjA2NTQxOTczMn0.SL-ZXxdXUdEQvdn9nws2uOVZksSwduixVqfsmE0NGHU';
+const initializeSupabaseClient = () => {
+  try {
+    const env = getValidatedEnv();
+    
+    if (!env.VITE_SUPABASE_URL || !env.VITE_SUPABASE_ANON_KEY) {
+      throw new Error('Variáveis de ambiente do Supabase não encontradas.');
+    }
 
-// Escolhe env ou fallback
-const supabaseUrl = VITE_URL || FALLBACK_URL;
-const supabaseAnonKey = VITE_ANON || FALLBACK_ANON;
+    _client = createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_ANON_KEY, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    });
 
-// Singleton
-let _client;
-try {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Supabase URL/Anon Key ausentes.');
+    if (isDevelopmentEnv()) {
+      console.log('✅ Supabase client inicializado com sucesso');
+    }
+
+    return _client;
+  } catch (error) {
+    console.error('❌ Erro ao inicializar Supabase client:', error.message);
+    
+    if (isDevelopmentEnv()) {
+      console.error('Verifique se as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY estão definidas no arquivo .env');
+    }
+    
+    _client = null;
+    throw error;
   }
-  _client = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  });
-} catch (e) {
-  console.error('Erro criando o Supabase client:', e);
-  _client = null;
+};
+
+// Inicializar o cliente
+try {
+  initializeSupabaseClient();
+} catch (error) {
+  // Em desenvolvimento, re-throw para mostrar erro
+  if (isDevelopmentEnv()) {
+    throw error;
+  }
+  // Em produção, apenas log do erro
+  console.error('Supabase initialization failed:', error.message);
 }
 
-// Exporta dos dois jeitos
-export const supabase = _client;
-export default _client;
+// Getter para o cliente com lazy initialization
+export const getSupabaseClient = () => {
+  if (!_client) {
+    try {
+      return initializeSupabaseClient();
+    } catch (error) {
+      throw new Error('Não foi possível conectar ao banco de dados. Verifique sua configuração.');
+    }
+  }
+  return _client;
+};
+
+// Export padrão para compatibilidade
+export const supabase = getSupabaseClient();
+export default supabase;
