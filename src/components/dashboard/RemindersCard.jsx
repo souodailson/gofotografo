@@ -99,19 +99,17 @@ const ReminderItem = ({
       </div>
       {/* Botão de follow-up sempre visível se onFollowUp for passado */}
       {onFollowUp && (
-        // No NotificationItem e ReminderItem:
-<button
-  onClick={() => onFollowUp(reminder)}
-  className="p-1"
-  title="Follow-up"
->
-  <img
-    src="https://cdn-icons-png.flaticon.com/512/16566/16566143.png"
-    alt="WhatsApp"
-    className="w-4 h-4"
-  />
-</button>
-
+        <button
+          onClick={() => onFollowUp(reminder)}
+          className="p-1 hover:bg-green-50 hover:text-green-600 rounded-full transition-all duration-200"
+          title="Entrar em contato via WhatsApp"
+        >
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/16566/16566143.png"
+            alt="WhatsApp"
+            className="w-4 h-4"
+          />
+        </button>
       )}
     </motion.div>
   );

@@ -1,1 +1,0 @@
-import{c as n,j as t,a6 as r}from"./index-hGCyqJo1.js";const i=n("BarChart",[["line",{x1:"12",x2:"12",y1:"20",y2:"10",key:"1vz5eb"}],["line",{x1:"18",x2:"18",y1:"20",y2:"4",key:"cun8e5"}],["line",{x1:"6",x2:"6",y1:"20",y2:"16",key:"hq0ia6"}]]);function x({className:e,...a}){return t.jsx("div",{className:r("animate-pulse rounded-md bg-muted",e),...a})}export{i as B,x as S};
