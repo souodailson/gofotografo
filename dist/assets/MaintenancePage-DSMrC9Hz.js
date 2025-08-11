@@ -1,0 +1,1 @@
+import{ao as r,ap as o,aq as a,j as e,R as s,ar as t}from"./index-BNk_ELpO.js";o.workerSrc=`//cdnjs.cloudflare.com/ajax/libs/pdf.js/${r}/pdf.worker.min.mjs`;a.createRoot(document.getElementById("root")).render(e.jsx(s.StrictMode,{children:e.jsx(t,{})}));

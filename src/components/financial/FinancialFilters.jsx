@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Filter, Calendar as CalendarIcon } from 'lucide-react';
+import { PERIOD_FILTERS } from '@/lib/financialConstants';
 
 const selectBaseClasses = "w-full md:w-auto px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent";
 
@@ -35,10 +36,9 @@ const FinancialFilters = ({ filterType, setFilterType, filterPeriod, setFilterPe
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-muted-foreground" />
           <select value={filterPeriod} onChange={(e) => handlePeriodChange(e.target.value)} className={selectBaseClasses}>
-            <option value="all">Todos os períodos</option>
-            <option value="today">Hoje</option>
-            <option value="week">Esta semana</option>
-            <option value="month">Este mês</option>
+            {PERIOD_FILTERS.map(filter => (
+              <option key={filter.value} value={filter.value}>{filter.label}</option>
+            ))}
           </select>
         </div>
       </div>

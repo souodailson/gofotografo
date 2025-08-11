@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, TrendingUp, ListFilter, Search, TrendingDown, Wallet } from 'lucide-react';
+import { Plus, TrendingUp, ListFilter, Search, TrendingDown, Wallet, AlertTriangle, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import FinancialSummary from '@/components/financial/FinancialSummary';
@@ -17,6 +17,9 @@ const Financial = ({ initialFilter, isMobile: propIsMobile }) => {
   const {
     financialSummary,
     filteredTransactions,
+    getFilteredTransactionsByListType,
+    overdueTransactions,
+    defaultDebtorTransactions,
     filterType,
     setFilterType,
     filterPeriod,
@@ -96,6 +99,14 @@ const Financial = ({ initialFilter, isMobile: propIsMobile }) => {
       setShowPaymentsToReceive(true);
       setFilterType('ALL');
       setFilterPeriod('all');
+    } else if (filter === 'atrasadas') {
+      setShowPaymentsToReceive(false);
+      setFilterType('ALL');
+      setFilterPeriod('all');
+    } else if (filter === 'inadimplentes') {
+      setShowPaymentsToReceive(false);
+      setFilterType('ENTRADA');
+      setFilterPeriod('all');
     }
   };
 
@@ -167,6 +178,20 @@ const Financial = ({ initialFilter, isMobile: propIsMobile }) => {
         >
             <TrendingUp className="w-4 h-4 mr-2" /> Contas a Receber
         </Button>
+        <Button 
+            variant={activeListFilter === 'atrasadas' ? 'default' : 'outline'}
+            onClick={() => handleListFilterClick('atrasadas')}
+            className={`${activeListFilter === 'atrasadas' ? "bg-orange-500 hover:bg-orange-600 text-white" : "border-border text-muted-foreground hover:bg-accent"} w-full sm:w-auto`}
+        >
+            <AlertTriangle className="w-4 h-4 mr-2" /> Contas Atrasadas
+        </Button>
+        <Button 
+            variant={activeListFilter === 'inadimplentes' ? 'default' : 'outline'}
+            onClick={() => handleListFilterClick('inadimplentes')}
+            className={`${activeListFilter === 'inadimplentes' ? "bg-red-700 hover:bg-red-800 text-white" : "border-border text-muted-foreground hover:bg-accent"} w-full sm:w-auto`}
+        >
+            <UserX className="w-4 h-4 mr-2" /> Inadimplentes
+        </Button>
       </div>
 
       {activeListFilter !== 'receber' && (
@@ -195,7 +220,12 @@ const Financial = ({ initialFilter, isMobile: propIsMobile }) => {
         <PaymentsToReceiveList cards={pendingToReceiveWorkflowCards} />
       ) : (
         <FinancialTransactionsList
-          transactions={filteredTransactions}
+          transactions={
+            activeListFilter === 'pagar' ? getFilteredTransactionsByListType :
+            activeListFilter === 'atrasadas' ? overdueTransactions :
+            activeListFilter === 'inadimplentes' ? defaultDebtorTransactions :
+            filteredTransactions
+          }
           onEdit={handleEditTransactionLocal}
           onDelete={handleDeleteTransaction}
           isMobile={isMobile}

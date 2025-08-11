@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
-import { format, startOfMonth, endOfMonth, subMonths, parseISO, startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subMonths, parseISO, startOfDay, endOfDay, startOfWeek, endOfWeek, subDays, startOfYear, endOfYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const useFinancialLogic = (initialFilter) => {
@@ -72,17 +72,70 @@ const useFinancialLogic = (initialFilter) => {
   }, [initialFilter]);
 
   const financialSummary = useMemo(() => {
-    const totalRevenue = financialData.transactions
+    let transactionsToSummarize = financialData.transactions;
+
+    // Apply period filter to summary calculations
+    if (filterPeriod !== 'all') {
+      transactionsToSummarize = financialData.transactions.filter(transaction => {
+        const relevantDateString = (transaction.status === 'PAGO' && transaction.data_recebimento) 
+                                  ? transaction.data_recebimento 
+                                  : transaction.data_vencimento || transaction.created_at;
+        
+        if (!relevantDateString) return false;
+
+        const transactionDate = parseISO(relevantDateString);
+        const now = new Date();
+
+        switch (filterPeriod) {
+          case 'today':
+            const todayStart = startOfDay(now);
+            const todayEnd = endOfDay(now);
+            return transactionDate >= todayStart && transactionDate <= todayEnd;
+          case 'week':
+            const weekStart = startOfWeek(now, { locale: ptBR });
+            const weekEnd = endOfWeek(now, { locale: ptBR });
+            return transactionDate >= weekStart && transactionDate <= weekEnd;
+          case 'month':
+            const monthStart = startOfMonth(now);
+            const monthEnd = endOfMonth(now);
+            return transactionDate >= monthStart && transactionDate <= monthEnd;
+          case 'last_7_days':
+            const last7DaysStart = startOfDay(subDays(now, 6));
+            const last7DaysEnd = endOfDay(now);
+            return transactionDate >= last7DaysStart && transactionDate <= last7DaysEnd;
+          case 'last_30_days':
+            const last30DaysStart = startOfDay(subDays(now, 29));
+            const last30DaysEnd = endOfDay(now);
+            return transactionDate >= last30DaysStart && transactionDate <= last30DaysEnd;
+          case 'last_90_days':
+            const last90DaysStart = startOfDay(subDays(now, 89));
+            const last90DaysEnd = endOfDay(now);
+            return transactionDate >= last90DaysStart && transactionDate <= last90DaysEnd;
+          case 'last_year':
+            const lastYearStart = startOfDay(subDays(now, 364));
+            const lastYearEnd = endOfDay(now);
+            return transactionDate >= lastYearStart && transactionDate <= lastYearEnd;
+          case 'current_year':
+            const currentYearStart = startOfYear(now);
+            const currentYearEnd = endOfYear(now);
+            return transactionDate >= currentYearStart && transactionDate <= currentYearEnd;
+          default: 
+            return true;
+        }
+      });
+    }
+
+    const totalRevenue = transactionsToSummarize
       .filter(t => t.tipo === 'ENTRADA' && t.status === 'PAGO')
       .reduce((sum, t) => sum + Number(t.valor), 0);
 
-    const totalExpenses = financialData.transactions
+    const totalExpenses = transactionsToSummarize
       .filter(t => t.tipo === 'SAIDA' && t.status === 'PAGO')
       .reduce((sum, t) => sum + Number(t.valor), 0);
     
     const netBalance = totalRevenue - totalExpenses;
     return { totalRevenue, totalExpenses, netBalance };
-  }, [financialData.transactions]);
+  }, [financialData.transactions, filterPeriod]);
 
   const filteredTransactions = useMemo(() => {
     let transactionsToFilter = financialData.transactions.map(t => ({
@@ -111,7 +164,6 @@ const useFinancialLogic = (initialFilter) => {
         }
       }
 
-
       let matchesPeriod = true;
       if (filterPeriod !== 'all') {
         const relevantDateString = (transaction.status === 'PAGO' && transaction.data_recebimento) 
@@ -138,12 +190,97 @@ const useFinancialLogic = (initialFilter) => {
             const monthEnd = endOfMonth(now);
             matchesPeriod = transactionDate >= monthStart && transactionDate <= monthEnd;
             break;
+          case 'last_7_days':
+            const last7DaysStart = startOfDay(subDays(now, 6));
+            const last7DaysEnd = endOfDay(now);
+            matchesPeriod = transactionDate >= last7DaysStart && transactionDate <= last7DaysEnd;
+            break;
+          case 'last_30_days':
+            const last30DaysStart = startOfDay(subDays(now, 29));
+            const last30DaysEnd = endOfDay(now);
+            matchesPeriod = transactionDate >= last30DaysStart && transactionDate <= last30DaysEnd;
+            break;
+          case 'last_90_days':
+            const last90DaysStart = startOfDay(subDays(now, 89));
+            const last90DaysEnd = endOfDay(now);
+            matchesPeriod = transactionDate >= last90DaysStart && transactionDate <= last90DaysEnd;
+            break;
+          case 'last_year':
+            const lastYearStart = startOfDay(subDays(now, 364));
+            const lastYearEnd = endOfDay(now);
+            matchesPeriod = transactionDate >= lastYearStart && transactionDate <= lastYearEnd;
+            break;
+          case 'current_year':
+            const currentYearStart = startOfYear(now);
+            const currentYearEnd = endOfYear(now);
+            matchesPeriod = transactionDate >= currentYearStart && transactionDate <= currentYearEnd;
+            break;
           default: break;
         }
       }
       return matchesType && matchesPeriod;
     }).sort((a, b) => parseISO(b.created_at).getTime() - parseISO(a.created_at).getTime());
   }, [financialData.transactions, filterType, filterPeriod, initialFilter, searchTerm, wallets]);
+
+  // New filtered functions for specific views
+  const getFilteredTransactionsByListType = useMemo(() => {
+    const now = new Date();
+    
+    switch (true) {
+      case filterType === 'SAIDA': // Contas a Pagar
+        return filteredTransactions.filter(t => 
+          t.tipo === 'SAIDA' && 
+          t.status === 'PENDENTE' && 
+          (!t.data_vencimento || parseISO(t.data_vencimento) >= now)
+        );
+      
+      case initialFilter?.isDashboardClick && initialFilter.type === 'saida' && initialFilter.status === 'pendente':
+        return filteredTransactions.filter(t => 
+          t.tipo === 'SAIDA' && 
+          t.status === 'PENDENTE'
+        );
+      
+      default:
+        return filteredTransactions;
+    }
+  }, [filteredTransactions, filterType, initialFilter]);
+
+  const overdueTransactions = useMemo(() => {
+    const now = new Date();
+    return financialData.transactions.filter(t => 
+      t.status === 'PENDENTE' && 
+      t.data_vencimento && 
+      parseISO(t.data_vencimento) < now
+    ).map(t => ({
+      ...t,
+      wallet: wallets.find(w => w.id === t.wallet_id)
+    }));
+  }, [financialData.transactions, wallets]);
+
+  const defaultDebtorTransactions = useMemo(() => {
+    const now = new Date();
+    const clientDebts = {};
+    
+    financialData.transactions
+      .filter(t => 
+        t.tipo === 'ENTRADA' && 
+        t.status === 'PENDENTE' && 
+        t.cliente_id &&
+        t.data_vencimento && 
+        parseISO(t.data_vencimento) < now
+      )
+      .forEach(t => {
+        if (!clientDebts[t.cliente_id]) {
+          clientDebts[t.cliente_id] = [];
+        }
+        clientDebts[t.cliente_id].push({
+          ...t,
+          wallet: wallets.find(w => w.id === t.wallet_id)
+        });
+      });
+
+    return Object.values(clientDebts).flat();
+  }, [financialData.transactions, wallets]);
 
   const handleAddTransaction = (type) => {
     setTransactionType(type);
@@ -231,6 +368,9 @@ const useFinancialLogic = (initialFilter) => {
   return {
     financialSummary,
     filteredTransactions,
+    getFilteredTransactionsByListType,
+    overdueTransactions,
+    defaultDebtorTransactions,
     isModalOpen,
     transactionType,
     editingTransaction,

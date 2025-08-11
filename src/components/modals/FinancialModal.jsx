@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
-import { Wallet } from 'lucide-react';
+import { Wallet, Search } from 'lucide-react';
+import { FINANCIAL_CATEGORIES, PAYMENT_METHODS } from '@/lib/financialConstants';
 
 const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess }) => {
     const { clients, addTransaction, updateTransaction, wallets } = useData();
@@ -97,13 +98,19 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
         <AnimatePresence>
             {isOpen && (
                 <Dialog open={isOpen} onOpenChange={onClose}>
-                    <DialogContent>
-                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
-                            <DialogHeader>
+                    <DialogContent className="max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }} 
+                            animate={{ opacity: 1, scale: 1 }} 
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="flex flex-col h-full"
+                        >
+                            <DialogHeader className="flex-shrink-0">
                                 <DialogTitle>{transactionData?.id ? 'Editar' : 'Novo'} Lançamento: {type === 'entrada' ? 'Entrada' : 'Saída'}</DialogTitle>
                                 <DialogDescription>Preencha os detalhes abaixo.</DialogDescription>
                             </DialogHeader>
-                            <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                            <div className="flex-1 overflow-y-auto pr-2">
+                                <form onSubmit={handleSubmit} className="space-y-4 py-4">
                                 <div>
                                     <Label htmlFor="descricao">Descrição</Label>
                                     <Input id="descricao" value={descricao} onChange={(e) => setDescricao(e.target.value)} required />
@@ -132,21 +139,58 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
                                     <Label htmlFor="cliente">Cliente (Opcional)</Label>
                                     <Select value={clienteId || ''} onValueChange={setClienteId}>
                                         <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent className="max-h-60">
                                             <SelectItem value="">Nenhum</SelectItem>
                                             {validClients.map(client => (
-                                                <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                                                <SelectItem key={client.id} value={client.id}>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium">{client.name}</span>
+                                                        {client.email && (
+                                                            <span className="text-xs text-muted-foreground">{client.email}</span>
+                                                        )}
+                                                    </div>
+                                                </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div>
                                     <Label htmlFor="categoria">Categoria (Opcional)</Label>
-                                    <Input id="categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)} />
+                                    <Select value={categoria} onValueChange={setCategoria}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecione uma categoria" />
+                                        </SelectTrigger>
+                                        <SelectContent className="max-h-60">
+                                            <SelectItem value="">Sem categoria</SelectItem>
+                                            {(FINANCIAL_CATEGORIES[type.toUpperCase()] || []).map((cat) => (
+                                                <SelectItem key={cat.value} value={cat.value}>
+                                                    <div className="flex items-center">
+                                                        <span className="mr-2">{cat.icon}</span>
+                                                        {cat.label}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
-                                 <div>
+                                <div>
                                     <Label htmlFor="metodoPagamento">Método de Pagamento (Opcional)</Label>
-                                    <Input id="metodoPagamento" value={metodoPagamento} onChange={(e) => setMetodoPagamento(e.target.value)} />
+                                    <Select value={metodoPagamento} onValueChange={setMetodoPagamento}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecione um método" />
+                                        </SelectTrigger>
+                                        <SelectContent className="max-h-60">
+                                            <SelectItem value="">Não especificado</SelectItem>
+                                            {PAYMENT_METHODS.map((method) => (
+                                                <SelectItem key={method.value} value={method.value}>
+                                                    <div className="flex items-center">
+                                                        <span className="mr-2">{method.icon}</span>
+                                                        {method.label}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div>
                                     <Label htmlFor="wallet" className="flex items-center">
@@ -158,7 +202,7 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Selecione uma carteira" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="max-h-60">
                                                 <SelectItem value="">Nenhuma</SelectItem>
                                                 {validWallets.map(wallet => (
                                                     <SelectItem key={wallet.id} value={wallet.id}>
@@ -181,11 +225,12 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex justify-end space-x-2 pt-4">
+                                <div className="flex justify-end space-x-2 pt-4 flex-shrink-0">
                                     <Button type="button" variant="ghost" onClick={onClose} disabled={isSaving}>Cancelar</Button>
                                     <Button type="submit" disabled={isSaving}>{isSaving ? 'Salvando...' : 'Salvar'}</Button>
                                 </div>
-                            </form>
+                                </form>
+                            </div>
                         </motion.div>
                     </DialogContent>
                 </Dialog>
