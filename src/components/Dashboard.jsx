@@ -360,10 +360,9 @@ const greetingMemo = useMemo(
   };
 
   const handleToggleBalances = async () => {
-    const newShowBalances =
-      !(settings?.hide_dashboard_balances !== false);
+    const currentlyHidden = settings?.hide_dashboard_balances !== false;
     await saveSettingsToContext(
-      { hide_dashboard_balances: !newShowBalances },
+      { hide_dashboard_balances: !currentlyHidden },
       true,
     );
   };

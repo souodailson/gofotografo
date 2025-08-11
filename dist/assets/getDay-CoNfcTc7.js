@@ -1,1 +1,0 @@
-import{ak as a}from"./index-Dk_dtFm9.js";function i(e,c){const s=a(e.start),n=a(e.end);let o=+s>+n;const d=o?+s:+n,t=o?n:s;t.setHours(0,0,0,0);let D=1;const r=[];for(;+t<=d;)r.push(a(t)),t.setDate(t.getDate()+D),t.setHours(0,0,0,0);return o?r.reverse():r}function p(e){return a(e).getDay()}export{i as e,p as g};
