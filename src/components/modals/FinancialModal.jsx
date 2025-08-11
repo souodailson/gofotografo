@@ -48,7 +48,7 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
                 setData(transactionData.data ? format(new Date(transactionData.data), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'));
                 setStatus(transactionData.status || 'PENDENTE');
                 setClienteId(transactionData.cliente_id || '');
-                setSupplierId(transactionData.supplier_id || '');
+                setSupplierId(transactionData.fornecedor_id || transactionData.supplier_id || '');
                 setCategoria(transactionData.category || '');
                 setMetodoPagamento(transactionData.metodo_pagamento || '');
                 setWalletId(transactionData.wallet_id || '');
@@ -74,7 +74,7 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
             tipo: type.toUpperCase(),
             status,
             cliente_id: type.toUpperCase() === 'ENTRADA' ? (clienteId || null) : null,
-            supplier_id: type.toUpperCase() === 'SAIDA' ? (supplierId || null) : null,
+            fornecedor_id: type.toUpperCase() === 'SAIDA' ? (supplierId || null) : null, // Será removido pela API até criar coluna no banco
             category: categoria,
             metodo_pagamento: metodoPagamento,
             wallet_id: walletId || null,
@@ -134,7 +134,7 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
                                 <DialogTitle>{transactionData?.id ? 'Editar' : 'Novo'} Lançamento: {type === 'entrada' ? 'Entrada' : 'Saída'}</DialogTitle>
                                 <DialogDescription>Preencha os detalhes abaixo.</DialogDescription>
                             </DialogHeader>
-                            <div className="flex-1 overflow-y-auto pr-2">
+                            <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/30">
                                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                                 <div>
                                     <Label htmlFor="descricao">Descrição</Label>

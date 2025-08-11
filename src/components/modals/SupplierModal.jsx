@@ -142,13 +142,13 @@ const SupplierModal = () => {
   return (
     <AnimatePresence>
       {isOpen && (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[5000]">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[4100]">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="bg-card/80 backdrop-blur-lg border border-border/50 rounded-xl p-0 w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col z-[5001]"
+          className="bg-card/80 backdrop-blur-lg border border-border/50 rounded-xl p-0 w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col z-[4101]"
         >
           <div className="flex items-center justify-between p-6 border-b border-border/50">
             <h2 className="text-xl font-semibold text-foreground">

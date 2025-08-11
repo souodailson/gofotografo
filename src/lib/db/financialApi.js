@@ -15,6 +15,11 @@ export const addTransaction = async (supabaseClient, userId, transaction) => {
     delete newTransaction.client_id;
   }
 
+  // Remove fornecedor_id temporariamente até criar coluna no banco
+  if ('fornecedor_id' in newTransaction) {
+    delete newTransaction.fornecedor_id;
+  }
+
   if ('date' in newTransaction) {
     newTransaction.data = newTransaction.date;
     delete newTransaction.date;
@@ -43,6 +48,11 @@ export const updateTransaction = async (supabaseClient, userId, id, updates) => 
   if ('client_id' in transactionUpdates) {
     transactionUpdates.cliente_id = transactionUpdates.client_id;
     delete transactionUpdates.client_id;
+  }
+
+  // Remove fornecedor_id temporariamente até criar coluna no banco
+  if ('fornecedor_id' in transactionUpdates) {
+    delete transactionUpdates.fornecedor_id;
   }
 
   if ('date' in transactionUpdates) {
