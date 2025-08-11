@@ -71,7 +71,7 @@ const WorkflowFilters = ({ activeFilters, setActiveFilters, searchTerm, setSearc
             <SelectTrigger id="eventType" className="bg-background">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60">
               <SelectItem value="all-items">Todos</SelectItem>
               {eventTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
             </SelectContent>
@@ -98,7 +98,7 @@ const WorkflowFilters = ({ activeFilters, setActiveFilters, searchTerm, setSearc
               <SelectTrigger id="packageId" className="min-w-[150px] bg-background">
                   <SelectValue placeholder="Todos" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-60">
                   <SelectItem value="all-items">Todos</SelectItem>
                   {Array.isArray(servicePackagesData) && servicePackagesData.map(pkg => <SelectItem key={pkg.id} value={pkg.id}>{pkg.name}</SelectItem>)}
               </SelectContent>
@@ -127,7 +127,7 @@ const WorkflowFilters = ({ activeFilters, setActiveFilters, searchTerm, setSearc
             <SelectTrigger id="tagFilter" className="bg-background">
               <SelectValue placeholder="Todas" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60">
               <SelectItem value="all-items">Todas</SelectItem>
               {allTags.map(tag => <SelectItem key={tag} value={tag}>{tag}</SelectItem>)}
             </SelectContent>

@@ -76,7 +76,7 @@ const ReserveAllocationToast = ({ allocation, savingGoals, onConfirm, onDismiss 
                 <SelectTrigger id="goalSelect" className="w-full bg-input border-border focus:border-customPurple">
                   <SelectValue placeholder="Selecione uma meta..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60">
                   {savingGoals.filter(g => g.id).map(goal => (
                     <SelectItem key={goal.id} value={goal.id}>
                       {goal.icone && <span className="mr-2">{goal.icone}</span>}

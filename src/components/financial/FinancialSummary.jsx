@@ -71,7 +71,7 @@ const FinancialSummary = ({ summary, summaryPeriod, onSummaryPeriodChange }) => 
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Período dos cards" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60">
               {PERIOD_FILTERS.map(filter => (
                 <SelectItem key={filter.value} value={filter.value}>
                   {filter.label}

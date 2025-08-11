@@ -132,7 +132,7 @@ const WorkflowModalForm = ({ card, onSave, onCancel, isSaving }) => {
                 <Label htmlFor="client_id">Cliente</Label>
                 <Select name="client_id" value={formData.client_id || ''} onValueChange={(value) => handleSelectChange('client_id', value)}>
                     <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-60">
                         {validClients.map(client => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
                     </SelectContent>
                 </Select>
@@ -151,7 +151,7 @@ const WorkflowModalForm = ({ card, onSave, onCancel, isSaving }) => {
                 <Label htmlFor="status">Status</Label>
                 <Select name="status" value={formData.status} onValueChange={(value) => handleSelectChange('status', value)}>
                     <SelectTrigger><SelectValue placeholder="Selecione um status" /></SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-60">
                         {workflowColumns.map(col => <SelectItem key={col.id} value={col.id}>{col.title}</SelectItem>)}
                     </SelectContent>
                 </Select>
@@ -160,7 +160,7 @@ const WorkflowModalForm = ({ card, onSave, onCancel, isSaving }) => {
                 <Label htmlFor="service_package_id">Pacote de Serviço (Opcional)</Label>
                 <Select name="service_package_id" value={formData.service_package_id || ''} onValueChange={(value) => handleSelectChange('service_package_id', value)}>
                     <SelectTrigger><SelectValue placeholder="Selecione um pacote" /></SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-60">
                         <SelectItem value="">Nenhum</SelectItem>
                         {validServicePackages.map(pkg => <SelectItem key={pkg.id} value={pkg.id}>{pkg.name}</SelectItem>)}
                     </SelectContent>

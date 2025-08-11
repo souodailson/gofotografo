@@ -133,7 +133,7 @@ const BoardCardModal = ({ isOpen, onClose, cardId, refreshBoard }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[625px]">
+      <DialogContent className="sm:max-w-[625px] max-h-[90vh] overflow-hidden flex flex-col">
         {loading ? (
           <div className="flex justify-center items-center h-48">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -154,7 +154,7 @@ const BoardCardModal = ({ isOpen, onClose, cardId, refreshBoard }) => {
               <Button variant={cardType === 'checklist' ? 'default' : 'outline'} onClick={() => handleCardTypeChange('checklist')}>Checklist</Button>
             </div>
 
-            <div className="py-4 space-y-4">
+            <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-2 scrollbar-thin">
               {cardType === 'nota' ? (
                 <div>
                   <Label htmlFor="content">Conteúdo</Label>

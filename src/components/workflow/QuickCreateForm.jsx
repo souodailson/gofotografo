@@ -65,7 +65,7 @@ const QuickCreateForm = ({ initialData, onSave, onCancel, onOpenClientModal, isS
                 <div className="flex space-x-2">
                     <Select name="client_id" value={formData.client_id || ""} onValueChange={(value) => handleSelectChange('client_id', value)} disabled={isSaving}>
                         <SelectTrigger><SelectValue placeholder="Selecione um cliente..." /></SelectTrigger>
-                        <SelectContent>{(clients || []).map(client => (<SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>))}</SelectContent>
+                        <SelectContent className="max-h-60">{(clients || []).map(client => (<SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>))}</SelectContent>
                     </Select>
                     <Button type="button" variant="outline" onClick={onOpenClientModal} disabled={isSaving}><Plus className="w-4 h-4" /></Button>
                 </div>
