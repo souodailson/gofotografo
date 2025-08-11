@@ -95,6 +95,12 @@ const Dashboard = ({ setActiveTab }) => {
     return getInitialCardConfig(setActiveTab, wallets);
   }, [setActiveTab, wallets]);
 
+// já existe useMemo importado no topo
+const greetingMemo = useMemo(
+  () => getGreeting(settings?.user_name),
+  [settings?.user_name] // só muda se o nome mudar
+);
+
   const [layouts, setLayouts] = useState({
     lg: [],
     md: [],
@@ -382,7 +388,7 @@ const Dashboard = ({ setActiveTab }) => {
   return (
     <div className="space-y-4 sm:space-y-6">
       <DashboardHeader
-        greeting={getGreeting(settings?.user_name)}
+        greeting={greetingMemo}
         isPersonalizing={isEditing}
         isSaving={isSaving}
         onPersonalizeToggle={handlePersonalizeToggle}
@@ -411,7 +417,7 @@ const Dashboard = ({ setActiveTab }) => {
         }}
         cols={{
           lg: 12,
-          md: 10,
+          md: 12,
           sm: 4,
           xs: 2,
           xxs: 2,
