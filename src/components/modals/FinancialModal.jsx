@@ -102,18 +102,28 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
     const validSuppliers = suppliers?.filter(s => s && s.id && s.name) || [];
 
     const handleNewClient = () => {
-        openModal('client', {});
+        openModal('client', { 
+            returnTo: 'financial',
+            onSuccess: (newClient) => {
+                setClienteId(newClient.id);
+            }
+        });
     };
 
     const handleNewSupplier = () => {
-        openModal('supplier', {});
+        openModal('supplier', { 
+            returnTo: 'financial',
+            onSuccess: (newSupplier) => {
+                setSupplierId(newSupplier.id);
+            }
+        });
     };
 
     return (
         <AnimatePresence>
             {isOpen && (
                 <Dialog open={isOpen} onOpenChange={onClose}>
-                    <DialogContent className="max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+                    <DialogContent className="max-w-lg max-h-[90vh] overflow-hidden flex flex-col z-[4000]">
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.9 }} 
                             animate={{ opacity: 1, scale: 1 }} 

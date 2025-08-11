@@ -13,7 +13,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
           const { user, addClient, updateClient, getClientById } = useData();
           const { toast } = useToast();
           const { openModals, closeModal } = useModalState();
-          const { isOpen, clientId } = openModals['client'] || {};
+          const { isOpen, clientId, returnTo, onSuccess } = openModals['client'] || {};
           const client = clientId ? getClientById(clientId) : null;
 
           const [isLoading, setIsLoading] = useState(false);
@@ -149,19 +149,30 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 
               dataToSave.profile_photo_url = photoUrl;
 
+              let savedClient;
               if (client) {
-                await updateClient(client.id, dataToSave);
+                savedClient = await updateClient(client.id, dataToSave);
                 toast({
                   title: "Cliente atualizado",
                   description: "Cliente foi atualizado com sucesso!"
                 });
               } else {
-                await addClient(dataToSave);
+                savedClient = await addClient(dataToSave);
                 toast({
                   title: "Cliente adicionado",
                   description: "Novo cliente foi adicionado com sucesso!"
                 });
               }
+              
+              // Se foi chamado de outro modal, executa callback e mantém modal aberto
+              if (returnTo && onSuccess) {
+                onSuccess(savedClient || { ...dataToSave, id: client?.id });
+                toast({
+                  title: "Sucesso!",
+                  description: "Cliente selecionado automaticamente no formulário financeiro."
+                });
+              }
+              
               localStorage.removeItem(DRAFT_KEY);
               handleCloseModal();
             } catch(error) {

@@ -4,6 +4,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from './authContext.jsx';
 import { useDataManagement } from './useDataManagement';
 import { useClientManager } from './useClientManager';
+import { useSupplierManager } from './useSupplierManager';
 import { useAffiliateManager } from './useAffiliateManager';
 import { updateWorkflowCard as updateWorkflowCardDb, deleteWorkflowCard as deleteWorkflowCardDb, addCommentToWorkflowCard as addCommentDb } from '@/lib/db/workflowApi.js';
 import { addTransaction as addTransactionDb, updateTransaction as updateTransactionDb, deleteTransaction as deleteTransactionDb, getTransactionsByWorkflowId } from '@/lib/db/financialApi.js';
@@ -30,7 +31,7 @@ export const DataProvider = ({ children }) => {
   const { user, session, settings, loadingAuth, setSettings } = useAuth();
   
   const {
-    clients, workflowCards, financialData, servicePackages, equipments, maintenances, 
+    clients, suppliers, workflowCards, financialData, servicePackages, equipments, maintenances, 
     fixedCosts, pricedServices, savingGoals, pendingReserveAllocations, upcomingReminders,
     clientContracts, clientOrcamentos, availabilitySlots, proposals, blogPosts,
     featureFlags, affiliateData, loadingData, initialLoadCompleted, wallets, contratos, setDataState,
@@ -79,6 +80,8 @@ export const DataProvider = ({ children }) => {
   }, [settings?.workflow_columns]);
 
   const { addClient, updateClient, deleteClient, getClientById } = useClientManager(user, isUserActive, clients, (newClients) => setDataState(p => ({...p, clients: newClients})), handleError, (reminders) => setDataState(p => ({...p, upcomingReminders: reminders})));
+  
+  const { addSupplier, updateSupplier, deleteSupplier, getSupplierById } = useSupplierManager(user, isUserActive, suppliers, (newSuppliers) => setDataState(p => ({...p, suppliers: newSuppliers})), handleError);
   
   const { handleNewSubscription } = useAffiliateManager(user, settings);
 
@@ -362,7 +365,7 @@ export const DataProvider = ({ children }) => {
   const updateOrcamento = async (id, data) => { if (!user || !isUserActive()) throw new Error("Operação não permitida"); try { const res = await updateOrcamentoDb(supabase, id, data, user.id); setDataState(p=>({...p, clientOrcamentos:p.clientOrcamentos.map(o=>o.id===id?res:o).sort((a,b)=>new Date(b.data_envio)-new Date(a.data_envio))})); return res; } catch(e){handleError(e, 'update orçamento'); throw e;}};
   const deleteOrcamento = async (id) => { if (!user || !isUserActive()) throw new Error("Operação não permitida"); try { await deleteOrcamentoDb(supabase, id, user.id); setDataState(p=>({...p, clientOrcamentos:p.clientOrcamentos.filter(o=>o.id!==id)})); } catch(e){handleError(e, 'delete orçamento'); throw e;}};
 
-  const value = { clients, workflowCards, financialData, settings, loading: loadingData || loadingAuth, servicePackages, user, session, loadingAuth, refreshData, planStatus, trialDaysRemaining, isUserActive, equipments, maintenances, fixedCosts, pricedServices, savingGoals, pendingReserveAllocations, upcomingReminders, clientContracts, clientOrcamentos, availabilitySlots, proposals, blogPosts, featureFlags, isFeatureEnabled, affiliateData, wallets, contratos, getWalletBalance, addClient, updateClient, deleteClient, getClientById, addWorkflowCard, updateWorkflowCard, deleteWorkflowCard, addComment, getStatusLabel, importGoogleEventsAsWorkflowCards, getWorkflowCardById, addTransaction, updateTransaction, deleteTransaction, getTransactionById, setSettings, addServicePackage, updateServicePackage, deleteServicePackage, getServicePackageById, addEquipment, updateEquipment, deleteEquipment, addMaintenance, getEquipmentMaintenances, addFixedCost, updateFixedCost, deleteFixedCost, addPricedService, addSavingGoal, updateSavingGoal, deleteSavingGoal, updateSavingGoalBalance, allocateToSavingGoal, dismissPendingAllocation, refreshClientContracts, addClientContract, deleteClientContract, refreshClientOrcamentos, addOrcamento, updateOrcamento, deleteOrcamento, deleteAllUserData, deleteUserAccount, deleteProposal, handleNewSubscription, addWallet, updateWallet, deleteWallet, initialCardConfigMemo };
+  const value = { clients, suppliers, workflowCards, financialData, settings, loading: loadingData || loadingAuth, servicePackages, user, session, loadingAuth, refreshData, planStatus, trialDaysRemaining, isUserActive, equipments, maintenances, fixedCosts, pricedServices, savingGoals, pendingReserveAllocations, upcomingReminders, clientContracts, clientOrcamentos, availabilitySlots, proposals, blogPosts, featureFlags, isFeatureEnabled, affiliateData, wallets, contratos, getWalletBalance, addClient, updateClient, deleteClient, getClientById, addSupplier, updateSupplier, deleteSupplier, getSupplierById, addWorkflowCard, updateWorkflowCard, deleteWorkflowCard, addComment, getStatusLabel, importGoogleEventsAsWorkflowCards, getWorkflowCardById, addTransaction, updateTransaction, deleteTransaction, getTransactionById, setSettings, addServicePackage, updateServicePackage, deleteServicePackage, getServicePackageById, addEquipment, updateEquipment, deleteEquipment, addMaintenance, getEquipmentMaintenances, addFixedCost, updateFixedCost, deleteFixedCost, addPricedService, addSavingGoal, updateSavingGoal, deleteSavingGoal, updateSavingGoalBalance, allocateToSavingGoal, dismissPendingAllocation, refreshClientContracts, addClientContract, deleteClientContract, refreshClientOrcamentos, addOrcamento, updateOrcamento, deleteOrcamento, deleteAllUserData, deleteUserAccount, deleteProposal, handleNewSubscription, addWallet, updateWallet, deleteWallet, initialCardConfigMemo };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };

@@ -6,6 +6,7 @@ import { calculateFinancialSummary } from '@/lib/financialUtils';
 export const useDataManagement = (user, settings, toast) => {
   const [state, setState] = useState({
     clients: [],
+    suppliers: [],
     workflowCards: [],
     financialData: { transactions: [], income: 0, expenses: 0, balance: 0, potentialLeadValue: 0 },
     servicePackages: [],
@@ -41,6 +42,7 @@ export const useDataManagement = (user, settings, toast) => {
   const clearLocalData = useCallback(() => {
     setState({
       clients: [],
+      suppliers: [],
       workflowCards: [],
       financialData: { transactions: [], income: 0, expenses: 0, balance: 0, potentialLeadValue: 0 },
       servicePackages: [],
@@ -70,6 +72,7 @@ export const useDataManagement = (user, settings, toast) => {
     
     const fetchMap = {
       clients: () => supabase.from('clients').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      suppliers: () => supabase.from('suppliers').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       workflow_cards: () => supabase.from('workflow_cards').select('*').eq('user_id', user.id).order('order', { ascending: true }),
       transacoes: () => supabase.from('transacoes').select('*').eq('user_id', user.id).order('data', { ascending: false }),
       service_packages: () => supabase.from('service_packages').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
@@ -112,6 +115,7 @@ export const useDataManagement = (user, settings, toast) => {
         const key = dataToFetch[i];
         switch (key) {
           case 'clients': newStateUpdates.clients = res.data; break;
+          case 'suppliers': newStateUpdates.suppliers = res.data; break;
           case 'workflow_cards': newStateUpdates.workflowCards = res.data; break;
           case 'transacoes': newStateUpdates.financialData = { ...calculateFinancialSummary(res.data), transactions: res.data }; break;
           case 'service_packages': newStateUpdates.servicePackages = res.data; break;
@@ -149,12 +153,13 @@ export const useDataManagement = (user, settings, toast) => {
     setDataState({ loadingData: true });
     try {
       const [
-        clientsRes, workflowCardsRes, transactionsRes, servicePackagesRes,
+        clientsRes, suppliersRes, workflowCardsRes, transactionsRes, servicePackagesRes,
         equipmentsRes, maintenancesRes, fixedCostsRes, pricedServicesRes,
         savingGoalsRes, availabilitySlotsRes, proposalsRes, contratosRes, walletsRes,
         featureFlagsRes, referralsRes, commissionsRes
       ] = await Promise.all([
         supabase.from('clients').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+        supabase.from('suppliers').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
         supabase.from('workflow_cards').select('*').eq('user_id', currentUser.id).order('order', { ascending: true }),
         supabase.from('transacoes').select('*').eq('user_id', currentUser.id).order('data', { ascending: false }),
         supabase.from('service_packages').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
@@ -173,7 +178,7 @@ export const useDataManagement = (user, settings, toast) => {
       ]);
 
       const errors = [
-        clientsRes.error, workflowCardsRes.error, transactionsRes.error, servicePackagesRes.error,
+        clientsRes.error, suppliersRes.error, workflowCardsRes.error, transactionsRes.error, servicePackagesRes.error,
         equipmentsRes.error, maintenancesRes.error, fixedCostsRes.error, pricedServicesRes.error,
         savingGoalsRes.error, availabilitySlotsRes.error, proposalsRes.error, contratosRes.error, walletsRes.error,
         featureFlagsRes.error, referralsRes.error, commissionsRes.error
@@ -192,6 +197,7 @@ export const useDataManagement = (user, settings, toast) => {
 
       setDataState({
         clients: clientsRes.data,
+        suppliers: suppliersRes.data || [],
         workflowCards: workflowCardsRes.data,
         financialData: { ...financialSummary, transactions: transactionsRes.data, potentialLeadValue },
         servicePackages: servicePackagesRes.data,

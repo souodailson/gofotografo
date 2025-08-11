@@ -11,7 +11,7 @@ const SupplierModal = () => {
   const { addSupplier, updateSupplier, getSupplierById } = useData();
   const { toast } = useToast();
   const { openModals, closeModal } = useModalState();
-  const { isOpen, supplierId } = openModals['supplier'] || {};
+  const { isOpen, supplierId, returnTo, onSuccess } = openModals['supplier'] || {};
   const supplier = supplierId ? getSupplierById(supplierId) : null;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -89,19 +89,30 @@ const SupplierModal = () => {
     }
 
     try {
+      let savedSupplier;
       if (supplier) {
-        await updateSupplier(supplier.id, dataToSave);
+        savedSupplier = await updateSupplier(supplier.id, dataToSave);
         toast({
           title: "Fornecedor atualizado",
           description: "Fornecedor foi atualizado com sucesso!"
         });
       } else {
-        await addSupplier(dataToSave);
+        savedSupplier = await addSupplier(dataToSave);
         toast({
           title: "Fornecedor adicionado",
           description: "Novo fornecedor foi adicionado com sucesso!"
         });
       }
+      
+      // Se foi chamado de outro modal, executa callback
+      if (returnTo && onSuccess) {
+        onSuccess(savedSupplier || { ...dataToSave, id: supplier?.id });
+        toast({
+          title: "Sucesso!",
+          description: "Fornecedor selecionado automaticamente no formulário financeiro."
+        });
+      }
+      
       localStorage.removeItem(DRAFT_KEY);
       handleCloseModal();
     } catch(error) {
