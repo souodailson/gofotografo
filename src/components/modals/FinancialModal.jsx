@@ -7,19 +7,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
+import { useModalState } from '@/contexts/ModalStateContext';
 import { format } from 'date-fns';
-import { Wallet, Search } from 'lucide-react';
+import { Wallet, Search, Plus } from 'lucide-react';
 import { FINANCIAL_CATEGORIES, PAYMENT_METHODS } from '@/lib/financialConstants';
 
 const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess }) => {
-    const { clients, addTransaction, updateTransaction, wallets } = useData();
+    const { clients, suppliers = [], addTransaction, updateTransaction, wallets } = useData();
     const { toast } = useToast();
+    const { openModal } = useModalState();
 
     const [descricao, setDescricao] = useState('');
     const [valor, setValor] = useState('');
     const [data, setData] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [status, setStatus] = useState('PENDENTE');
     const [clienteId, setClienteId] = useState('');
+    const [supplierId, setSupplierId] = useState('');
     const [categoria, setCategoria] = useState('');
     const [metodoPagamento, setMetodoPagamento] = useState('');
     const [walletId, setWalletId] = useState('');
@@ -31,6 +34,7 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
         setData(format(new Date(), 'yyyy-MM-dd'));
         setStatus('PENDENTE');
         setClienteId('');
+        setSupplierId('');
         setCategoria('');
         setMetodoPagamento('');
         setWalletId('');
@@ -44,6 +48,7 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
                 setData(transactionData.data ? format(new Date(transactionData.data), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'));
                 setStatus(transactionData.status || 'PENDENTE');
                 setClienteId(transactionData.cliente_id || '');
+                setSupplierId(transactionData.supplier_id || '');
                 setCategoria(transactionData.category || '');
                 setMetodoPagamento(transactionData.metodo_pagamento || '');
                 setWalletId(transactionData.wallet_id || '');
@@ -68,7 +73,8 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
             data,
             tipo: type.toUpperCase(),
             status,
-            cliente_id: clienteId || null,
+            cliente_id: type.toUpperCase() === 'ENTRADA' ? (clienteId || null) : null,
+            supplier_id: type.toUpperCase() === 'SAIDA' ? (supplierId || null) : null,
             category: categoria,
             metodo_pagamento: metodoPagamento,
             wallet_id: walletId || null,
@@ -93,6 +99,15 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
     
     const validWallets = wallets?.filter(w => w && w.id && w.name) || [];
     const validClients = clients?.filter(c => c && c.id && c.name) || [];
+    const validSuppliers = suppliers?.filter(s => s && s.id && s.name) || [];
+
+    const handleNewClient = () => {
+        openModal('client', {});
+    };
+
+    const handleNewSupplier = () => {
+        openModal('supplier', {});
+    };
 
     return (
         <AnimatePresence>
@@ -135,25 +150,74 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div>
-                                    <Label htmlFor="cliente">Cliente (Opcional)</Label>
-                                    <Select value={clienteId || ''} onValueChange={setClienteId}>
-                                        <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
-                                        <SelectContent className="max-h-60">
-                                            <SelectItem value="">Nenhum</SelectItem>
-                                            {validClients.map(client => (
-                                                <SelectItem key={client.id} value={client.id}>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-medium">{client.name}</span>
-                                                        {client.email && (
-                                                            <span className="text-xs text-muted-foreground">{client.email}</span>
-                                                        )}
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                                {type === 'entrada' ? (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label htmlFor="cliente">Cliente (Opcional)</Label>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleNewClient}
+                                                className="h-8 px-3 text-xs"
+                                            >
+                                                <Plus className="w-3 h-3 mr-1" />
+                                                Novo Cliente
+                                            </Button>
+                                        </div>
+                                        <Select value={clienteId || ''} onValueChange={setClienteId}>
+                                            <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
+                                            <SelectContent className="max-h-60">
+                                                <SelectItem value="">Nenhum</SelectItem>
+                                                {validClients.map(client => (
+                                                    <SelectItem key={client.id} value={client.id}>
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium">{client.name}</span>
+                                                            {client.email && (
+                                                                <span className="text-xs text-muted-foreground">{client.email}</span>
+                                                            )}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label htmlFor="fornecedor">Fornecedor (Opcional)</Label>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleNewSupplier}
+                                                className="h-8 px-3 text-xs"
+                                            >
+                                                <Plus className="w-3 h-3 mr-1" />
+                                                Novo Fornecedor
+                                            </Button>
+                                        </div>
+                                        <Select value={supplierId || ''} onValueChange={setSupplierId}>
+                                            <SelectTrigger><SelectValue placeholder="Selecione um fornecedor" /></SelectTrigger>
+                                            <SelectContent className="max-h-60">
+                                                <SelectItem value="">Nenhum</SelectItem>
+                                                {validSuppliers.map(supplier => (
+                                                    <SelectItem key={supplier.id} value={supplier.id}>
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium">{supplier.name}</span>
+                                                            {supplier.email && (
+                                                                <span className="text-xs text-muted-foreground">{supplier.email}</span>
+                                                            )}
+                                                            {supplier.category && (
+                                                                <span className="text-xs text-muted-foreground capitalize">{supplier.category.replace('_', ' ')}</span>
+                                                            )}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
                                 <div>
                                     <Label htmlFor="categoria">Categoria (Opcional)</Label>
                                     <Select value={categoria} onValueChange={setCategoria}>

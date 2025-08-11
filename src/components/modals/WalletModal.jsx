@@ -137,7 +137,7 @@ const WalletModal = ({ isOpen, onClose, walletData }) => {
                                     ) : 'Selecione um ícone'}
                                 </SelectValue>
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="max-h-60">
                                 {walletIcons[type]?.map(icon => (
                                     <SelectItem key={icon.name} value={icon.url}>
                                         <div className="flex items-center">

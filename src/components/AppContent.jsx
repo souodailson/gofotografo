@@ -15,6 +15,7 @@ import useAppModals from '@/hooks/useAppModals';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import ClientModal from '@/components/modals/ClientModal';
+import SupplierModal from '@/components/modals/SupplierModal';
 import FinancialModal from '@/components/modals/FinancialModal';
 import WorkflowModal from '@/components/modals/WorkflowModal';
 import ServicePackageModal from '@/components/modals/ServicePackageModal';
@@ -253,6 +254,7 @@ const AppContent = ({ children }) => {
         )} 
       </div>
       <ClientModal />
+      <SupplierModal />
       <WorkflowModal />
       <AnimatePresence>
         {financialModalState?.isOpen && (

@@ -32,6 +32,8 @@ const useFinancialLogic = (initialFilter) => {
     return 'all';
   });
   
+  const [summaryPeriod, setSummaryPeriod] = useState('month'); // Período padrão mensal para os cards
+  
   const [showPaymentsToReceive, setShowPaymentsToReceive] = useState(() => {
     if (initialFilter && initialFilter.isDashboardClick) {
       return initialFilter.type === 'entrada' && initialFilter.status === 'pendente';
@@ -74,8 +76,8 @@ const useFinancialLogic = (initialFilter) => {
   const financialSummary = useMemo(() => {
     let transactionsToSummarize = financialData.transactions;
 
-    // Apply period filter to summary calculations
-    if (filterPeriod !== 'all') {
+    // Apply summary period filter to summary calculations (independent from list filter)
+    if (summaryPeriod !== 'all') {
       transactionsToSummarize = financialData.transactions.filter(transaction => {
         const relevantDateString = (transaction.status === 'PAGO' && transaction.data_recebimento) 
                                   ? transaction.data_recebimento 
@@ -86,7 +88,7 @@ const useFinancialLogic = (initialFilter) => {
         const transactionDate = parseISO(relevantDateString);
         const now = new Date();
 
-        switch (filterPeriod) {
+        switch (summaryPeriod) {
           case 'today':
             const todayStart = startOfDay(now);
             const todayEnd = endOfDay(now);
@@ -135,7 +137,7 @@ const useFinancialLogic = (initialFilter) => {
     
     const netBalance = totalRevenue - totalExpenses;
     return { totalRevenue, totalExpenses, netBalance };
-  }, [financialData.transactions, filterPeriod]);
+  }, [financialData.transactions, summaryPeriod]);
 
   const filteredTransactions = useMemo(() => {
     let transactionsToFilter = financialData.transactions.map(t => ({
@@ -367,6 +369,8 @@ const useFinancialLogic = (initialFilter) => {
 
   return {
     financialSummary,
+    summaryPeriod,
+    setSummaryPeriod,
     filteredTransactions,
     getFilteredTransactionsByListType,
     overdueTransactions,

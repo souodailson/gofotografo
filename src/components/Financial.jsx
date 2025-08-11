@@ -16,6 +16,8 @@ import WalletsManager from '@/components/financial/WalletsManager';
 const Financial = ({ initialFilter, isMobile: propIsMobile }) => {
   const {
     financialSummary,
+    summaryPeriod,
+    setSummaryPeriod,
     filteredTransactions,
     getFilteredTransactionsByListType,
     overdueTransactions,
@@ -148,7 +150,11 @@ const Financial = ({ initialFilter, isMobile: propIsMobile }) => {
         </div>
       </div>
 
-      <FinancialSummary summary={financialSummary} />
+      <FinancialSummary 
+        summary={financialSummary} 
+        summaryPeriod={summaryPeriod}
+        onSummaryPeriodChange={setSummaryPeriod}
+      />
       
       <WalletsManager />
 
