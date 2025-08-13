@@ -20,11 +20,48 @@ const AdminSystem = () => {
 
   const fetchFeatureFlags = useCallback(async () => {
     setLoadingFeatures(true);
-    const { data, error } = await supabase.from('feature_flags').select('*').order('id');
-    if (error) {
+    try {
+      // Buscar funcionalidades da tabela original
+      const { data: originalFlags, error: originalError } = await supabase
+        .from('feature_flags')
+        .select('*')
+        .order('id');
+
+      // Buscar novas funcionalidades
+      const { data: newFlags, error: newError } = await supabase
+        .from('system_features')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (originalError && originalError.code !== 'PGRST116') {
+        console.error('Erro ao buscar funcionalidades originais:', originalError);
+        toast({ title: "Erro ao buscar funcionalidades", description: originalError.message, variant: "destructive" });
+      }
+
+      if (newError && newError.code !== 'PGRST116') {
+        console.error('Erro ao buscar novas funcionalidades:', newError);
+      }
+
+      // Combinar ambas as listas, priorizando as originais
+      const allFlags = [
+        ...(originalFlags || []).map(flag => ({
+          ...flag,
+          feature_name: flag.label || flag.nome_funcionalidade,
+          description: flag.descricao || 'Funcionalidade do sistema',
+          category: 'system',
+          is_enabled: flag.esta_ativa,
+          isOriginal: true
+        })),
+        ...(newFlags || []).map(flag => ({
+          ...flag,
+          isOriginal: false
+        }))
+      ];
+
+      setFeatureFlags(allFlags);
+    } catch (error) {
+      console.error('Erro geral ao buscar funcionalidades:', error);
       toast({ title: "Erro ao buscar funcionalidades", description: error.message, variant: "destructive" });
-    } else {
-      setFeatureFlags(data);
     }
     setLoadingFeatures(false);
   }, [toast]);
@@ -45,13 +82,51 @@ const AdminSystem = () => {
     fetchMaintenanceStatus();
   }, [fetchFeatureFlags, fetchMaintenanceStatus]);
 
-  const handleFeatureToggle = async (featureId, isActive) => {
-    const { error } = await supabase.from('feature_flags').update({ esta_ativa: isActive }).eq('id', featureId);
+  const handleFeatureToggle = async (featureId, isEnabled) => {
+    const feature = featureFlags.find(f => f.id === featureId);
+    if (!feature) return;
+
+    let error;
+    
+    if (feature.isOriginal) {
+      // Atualizar na tabela original
+      const { error: originalError } = await supabase
+        .from('feature_flags')
+        .update({ esta_ativa: isEnabled })
+        .eq('id', featureId);
+      error = originalError;
+    } else {
+      // Atualizar na tabela nova
+      const { error: newError } = await supabase
+        .from('system_features')
+        .update({ 
+          is_enabled: isEnabled,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', featureId);
+      error = newError;
+    }
+    
     if (error) {
+      console.error('Erro ao atualizar funcionalidade:', error);
       toast({ title: "Erro ao atualizar funcionalidade", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Sucesso", description: "Status da funcionalidade atualizado." });
-      setFeatureFlags(flags => flags.map(f => f.id === featureId ? { ...f, esta_ativa: isActive } : f));
+      toast({ 
+        title: "Sucesso", 
+        description: `Funcionalidade ${isEnabled ? 'ativada' : 'desativada'} com sucesso.` 
+      });
+      
+      // Atualizar estado local
+      setFeatureFlags(flags => flags.map(f => {
+        if (f.id === featureId) {
+          return { 
+            ...f, 
+            is_enabled: isEnabled,
+            esta_ativa: isEnabled // Para compatibilidade com ambos os formatos
+          };
+        }
+        return f;
+      }));
     }
   };
 
@@ -85,16 +160,88 @@ const AdminSystem = () => {
             <CardDescription>Ative ou desative módulos do sistema para todos os usuários.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {loadingFeatures ? <p>Carregando...</p> : featureFlags.map(feature => (
-              <div key={feature.id} className="flex items-center justify-between">
-                <Label htmlFor={`feature-${feature.id}`}>{feature.label}</Label>
-                <Switch
-                  id={`feature-${feature.id}`}
-                  checked={feature.esta_ativa}
-                  onCheckedChange={(checked) => handleFeatureToggle(feature.id, checked)}
-                />
+            {loadingFeatures ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span>Carregando funcionalidades...</span>
               </div>
-            ))}
+            ) : featureFlags.length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">Nenhuma funcionalidade encontrada</p>
+            ) : (
+              <div className="space-y-4">
+                {/* Funcionalidades Originais do Sistema */}
+                {featureFlags.filter(f => f.isOriginal).length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
+                      Sistema Principal
+                    </h4>
+                    {featureFlags.filter(f => f.isOriginal).map(feature => (
+                      <div key={feature.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex-1">
+                          <Label htmlFor={`feature-${feature.id}`} className="font-medium">
+                            {feature.feature_name || feature.label}
+                          </Label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {feature.description || feature.descricao || 'Funcionalidade do sistema'}
+                          </p>
+                        </div>
+                        <Switch
+                          id={`feature-${feature.id}`}
+                          checked={feature.is_enabled || feature.esta_ativa}
+                          onCheckedChange={(checked) => handleFeatureToggle(feature.id, checked)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Novas Funcionalidades */}
+                {featureFlags.filter(f => !f.isOriginal).length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
+                      Novas Funcionalidades
+                    </h4>
+                    {featureFlags.filter(f => !f.isOriginal).map(feature => (
+                      <div key={feature.id} className="space-y-2 p-3 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <Label htmlFor={`feature-${feature.id}`} className="font-semibold">
+                              {feature.feature_name}
+                            </Label>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {feature.description}
+                            </p>
+                            <div className="flex gap-2 mt-2">
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                feature.category === 'analytics' ? 'bg-blue-100 text-blue-800' :
+                                feature.category === 'business' ? 'bg-green-100 text-green-800' :
+                                feature.category === 'logistics' ? 'bg-purple-100 text-purple-800' :
+                                feature.category === 'locations' ? 'bg-orange-100 text-orange-800' :
+                                feature.category === 'creativity' ? 'bg-pink-100 text-pink-800' :
+                                feature.category === 'communication' ? 'bg-indigo-100 text-indigo-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {feature.category}
+                              </span>
+                              {feature.requires_subscription && (
+                                <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                                  Premium
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <Switch
+                            id={`feature-${feature.id}`}
+                            checked={feature.is_enabled}
+                            onCheckedChange={(checked) => handleFeatureToggle(feature.id, checked)}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
         <Card>

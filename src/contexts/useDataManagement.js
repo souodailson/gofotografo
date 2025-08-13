@@ -10,6 +10,7 @@ export const useDataManagement = (user, settings, toast) => {
     workflowCards: [],
     financialData: { transactions: [], income: 0, expenses: 0, balance: 0, potentialLeadValue: 0 },
     servicePackages: [],
+    products: [],
     equipments: [],
     maintenances: [],
     fixedCosts: [],
@@ -46,6 +47,7 @@ export const useDataManagement = (user, settings, toast) => {
       workflowCards: [],
       financialData: { transactions: [], income: 0, expenses: 0, balance: 0, potentialLeadValue: 0 },
       servicePackages: [],
+      products: [],
       equipments: [],
       maintenances: [],
       fixedCosts: [],
@@ -76,6 +78,7 @@ export const useDataManagement = (user, settings, toast) => {
       workflow_cards: () => supabase.from('workflow_cards').select('*').eq('user_id', user.id).order('order', { ascending: true }),
       transacoes: () => supabase.from('transacoes').select('*').eq('user_id', user.id).order('data', { ascending: false }),
       service_packages: () => supabase.from('service_packages').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      products: () => supabase.from('products').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       equipamentos: () => supabase.from('equipamentos').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       manutencoes: () => supabase.from('manutencoes').select('*').eq('user_id', user.id).order('data_manutencao', { ascending: false }),
       custos_fixos: () => supabase.from('custos_fixos').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
@@ -93,10 +96,19 @@ export const useDataManagement = (user, settings, toast) => {
     const dataToFetch = dataType === 'all' ? Object.keys(fetchMap) : [dataType];
     
     try {
-      const results = await Promise.all(dataToFetch.map((key) => {
+      const results = await Promise.all(dataToFetch.map(async (key) => {
         const fetchFunction = fetchMap[key];
         if (typeof fetchFunction === 'function') {
-          return fetchFunction();
+          try {
+            return await fetchFunction();
+          } catch (error) {
+            console.warn(`Erro ao carregar ${key}:`, error);
+            // Se for erro de tabela não existente, retorna dados vazios
+            if (error.code === '42P01' || error.message?.includes('does not exist')) {
+              return { data: [], error: null };
+            }
+            return { data: [], error: error };
+          }
         } else {
           console.warn(`fetchMap[${key}] não é uma função. Pulando.`);
           return Promise.resolve({ data: [], error: null }); // Retorna um Promise resolvido para não quebrar o Promise.all
@@ -119,6 +131,7 @@ export const useDataManagement = (user, settings, toast) => {
           case 'workflow_cards': newStateUpdates.workflowCards = res.data; break;
           case 'transacoes': newStateUpdates.financialData = { ...calculateFinancialSummary(res.data), transactions: res.data }; break;
           case 'service_packages': newStateUpdates.servicePackages = res.data; break;
+          case 'products': newStateUpdates.products = res.data; break;
           case 'equipamentos': newStateUpdates.equipments = res.data; break;
           case 'manutencoes': newStateUpdates.maintenances = res.data; break;
           case 'custos_fixos': newStateUpdates.fixedCosts = res.data; break;
@@ -152,40 +165,54 @@ export const useDataManagement = (user, settings, toast) => {
     if (!currentUser) return;
     setDataState({ loadingData: true });
     try {
+      const safeQuery = async (query, tableName) => {
+        try {
+          return await query;
+        } catch (error) {
+          console.warn(`Erro ao carregar ${tableName}:`, error);
+          if (error.code === '42P01' || error.message?.includes('does not exist')) {
+            return { data: [], error: null };
+          }
+          return { data: [], error: error };
+        }
+      };
+
       const [
-        clientsRes, suppliersRes, workflowCardsRes, transactionsRes, servicePackagesRes,
+        clientsRes, suppliersRes, workflowCardsRes, transactionsRes, servicePackagesRes, productsRes,
         equipmentsRes, maintenancesRes, fixedCostsRes, pricedServicesRes,
         savingGoalsRes, availabilitySlotsRes, proposalsRes, contratosRes, walletsRes,
         featureFlagsRes, referralsRes, commissionsRes
       ] = await Promise.all([
-        supabase.from('clients').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
-        supabase.from('suppliers').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
-        supabase.from('workflow_cards').select('*').eq('user_id', currentUser.id).order('order', { ascending: true }),
-        supabase.from('transacoes').select('*').eq('user_id', currentUser.id).order('data', { ascending: false }),
-        supabase.from('service_packages').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
-        supabase.from('equipamentos').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
-        supabase.from('manutencoes').select('*').eq('user_id', currentUser.id).order('data_manutencao', { ascending: false }),
-        supabase.from('custos_fixos').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
-        supabase.from('servicos_precificados').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
-        supabase.from('metas_reserva').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
-        supabase.from('availability_slots').select('*').eq('user_id', currentUser.id),
-        supabase.from('propostas').select('*').eq('user_id', currentUser.id).order('updated_at', { ascending: false }),
-        supabase.from('contratosgerados').select('*').eq('id_fotografo', currentUser.id).order('data_geracao', { ascending: false }),
-        supabase.from('wallets').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
-        supabase.from('feature_flags').select('*'),
-        supabase.from('referrals').select('*').eq('referrer_id', currentUser.id),
-        supabase.from('commissions').select('*').eq('referrer_id', currentUser.id),
+        safeQuery(supabase.from('clients').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'clients'),
+        safeQuery(supabase.from('suppliers').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'suppliers'),
+        safeQuery(supabase.from('workflow_cards').select('*').eq('user_id', currentUser.id).order('order', { ascending: true }), 'workflow_cards'),
+        safeQuery(supabase.from('transacoes').select('*').eq('user_id', currentUser.id).order('data', { ascending: false }), 'transacoes'),
+        safeQuery(supabase.from('service_packages').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'service_packages'),
+        safeQuery(supabase.from('products').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'products'),
+        safeQuery(supabase.from('equipamentos').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'equipamentos'),
+        safeQuery(supabase.from('manutencoes').select('*').eq('user_id', currentUser.id).order('data_manutencao', { ascending: false }), 'manutencoes'),
+        safeQuery(supabase.from('custos_fixos').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'custos_fixos'),
+        safeQuery(supabase.from('servicos_precificados').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'servicos_precificados'),
+        safeQuery(supabase.from('metas_reserva').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'metas_reserva'),
+        safeQuery(supabase.from('availability_slots').select('*').eq('user_id', currentUser.id), 'availability_slots'),
+        safeQuery(supabase.from('propostas').select('*').eq('user_id', currentUser.id).order('updated_at', { ascending: false }), 'propostas'),
+        safeQuery(supabase.from('contratosgerados').select('*').eq('id_fotografo', currentUser.id).order('data_geracao', { ascending: false }), 'contratos'),
+        safeQuery(supabase.from('wallets').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'wallets'),
+        safeQuery(supabase.from('feature_flags').select('*'), 'feature_flags'),
+        safeQuery(supabase.from('referrals').select('*').eq('referrer_id', currentUser.id), 'referrals'),
+        safeQuery(supabase.from('commissions').select('*').eq('referrer_id', currentUser.id), 'commissions'),
       ]);
 
-      const errors = [
+      // Filtra apenas erros críticos (não incluindo tabelas que não existem)
+      const criticalErrors = [
         clientsRes.error, suppliersRes.error, workflowCardsRes.error, transactionsRes.error, servicePackagesRes.error,
         equipmentsRes.error, maintenancesRes.error, fixedCostsRes.error, pricedServicesRes.error,
         savingGoalsRes.error, availabilitySlotsRes.error, proposalsRes.error, contratosRes.error, walletsRes.error,
         featureFlagsRes.error, referralsRes.error, commissionsRes.error
-      ].filter(Boolean);
+      ].filter(error => error && error.code !== '42P01' && !error.message?.includes('does not exist'));
 
-      if (errors.length > 0) {
-        errors.forEach(error => handleSupabaseError(error, 'carregar dados iniciais', toast));
+      if (criticalErrors.length > 0) {
+        criticalErrors.forEach(error => handleSupabaseError(error, 'carregar dados iniciais', toast));
         setDataState({ loadingData: false });
         return;
       }
@@ -201,6 +228,7 @@ export const useDataManagement = (user, settings, toast) => {
         workflowCards: workflowCardsRes.data,
         financialData: { ...financialSummary, transactions: transactionsRes.data, potentialLeadValue },
         servicePackages: servicePackagesRes.data,
+        products: productsRes.data || [],
         equipments: equipmentsRes.data,
         maintenances: maintenancesRes.data,
         fixedCosts: fixedCostsRes.data,

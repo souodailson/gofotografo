@@ -49,6 +49,14 @@ const BoardColumn = ({ column, index, refreshColumns, boardId }) => {
             coluna_id: column.id,
             user_id: user.id,
             ordem: column.cards?.length || 0,
+            customizacao: {
+              cor: '#3b82f6',
+              tags: [],
+              prioridade: 'media',
+              observacoes: '',
+              dataVencimento: '',
+              comentarios: []
+            }
         }).select().single();
 
         setNewCardContent('');
@@ -120,7 +128,9 @@ const BoardColumn = ({ column, index, refreshColumns, boardId }) => {
                   ref={providedDrop.innerRef}
                   {...providedDrop.droppableProps}
                   className={cn(
-                    "px-2 py-1 space-y-2 overflow-y-auto flex-grow min-h-[50px] transition-colors duration-200"
+                    "px-2 py-1 flex-grow min-h-[50px] transition-all duration-200",
+                    "flex flex-col gap-2 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide",
+                    snapshot.isDraggingOver && "bg-white/10 rounded-md"
                   )}
                 >
                   {column.cards && column.cards.length > 0 && column.cards.map((card, cardIndex) => (

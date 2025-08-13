@@ -79,7 +79,11 @@ const Financial = ({ initialFilter, isMobile: propIsMobile }) => {
 
   const handleAddTransaction = (type) => {
     setShowPaymentsToReceive(false);
-    openModal('financial', { type: type, transaction: null });
+    if (type === 'entrada') {
+      openModal('financialWizard', { type: type, transaction: null });
+    } else {
+      openModal('financial', { type: type, transaction: null });
+    }
   };
 
   const handleEditTransactionLocal = (transaction) => {
@@ -166,35 +170,35 @@ const Financial = ({ initialFilter, isMobile: propIsMobile }) => {
         <Button 
             variant={activeListFilter === 'geral' ? 'default' : 'outline'}
             onClick={() => handleListFilterClick('geral')}
-            className={`${activeListFilter === 'geral' ? "bg-blue-600 hover:bg-blue-700 text-white" : "border-border text-muted-foreground hover:bg-accent"} w-full sm:w-auto`}
+            className={`${activeListFilter === 'geral' ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg border-blue-600" : "border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950 hover:border-blue-400 dark:hover:border-blue-500"} w-full sm:w-auto transition-all duration-200`}
         >
             <ListFilter className="w-4 h-4 mr-2" /> Lançamentos Gerais
         </Button>
         <Button 
             variant={activeListFilter === 'pagar' ? 'default' : 'outline'}
             onClick={() => handleListFilterClick('pagar')}
-            className={`${activeListFilter === 'pagar' ? "bg-red-500 hover:bg-red-600 text-white" : "border-border text-muted-foreground hover:bg-accent"} w-full sm:w-auto`}
+            className={`${activeListFilter === 'pagar' ? "bg-red-500 hover:bg-red-600 text-white shadow-lg border-red-500" : "border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-400 dark:hover:border-red-500"} w-full sm:w-auto transition-all duration-200`}
         >
             <TrendingDown className="w-4 h-4 mr-2" /> Contas a Pagar
         </Button>
         <Button 
             variant={activeListFilter === 'receber' ? 'default' : 'outline'}
             onClick={() => handleListFilterClick('receber')}
-            className={`${activeListFilter === 'receber' ? "bg-green-500 hover:bg-green-600 text-white" : "border-border text-muted-foreground hover:bg-accent"} w-full sm:w-auto`}
+            className={`${activeListFilter === 'receber' ? "bg-green-500 hover:bg-green-600 text-white shadow-lg border-green-500" : "border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-green-50 dark:hover:bg-green-950 hover:border-green-400 dark:hover:border-green-500"} w-full sm:w-auto transition-all duration-200`}
         >
             <TrendingUp className="w-4 h-4 mr-2" /> Contas a Receber
         </Button>
         <Button 
             variant={activeListFilter === 'atrasadas' ? 'default' : 'outline'}
             onClick={() => handleListFilterClick('atrasadas')}
-            className={`${activeListFilter === 'atrasadas' ? "bg-orange-500 hover:bg-orange-600 text-white" : "border-border text-muted-foreground hover:bg-accent"} w-full sm:w-auto`}
+            className={`${activeListFilter === 'atrasadas' ? "bg-orange-500 hover:bg-orange-600 text-white shadow-lg border-orange-500" : "border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-orange-50 dark:hover:bg-orange-950 hover:border-orange-400 dark:hover:border-orange-500"} w-full sm:w-auto transition-all duration-200`}
         >
             <AlertTriangle className="w-4 h-4 mr-2" /> Contas Atrasadas
         </Button>
         <Button 
             variant={activeListFilter === 'inadimplentes' ? 'default' : 'outline'}
             onClick={() => handleListFilterClick('inadimplentes')}
-            className={`${activeListFilter === 'inadimplentes' ? "bg-red-700 hover:bg-red-800 text-white" : "border-border text-muted-foreground hover:bg-accent"} w-full sm:w-auto`}
+            className={`${activeListFilter === 'inadimplentes' ? "bg-red-700 hover:bg-red-800 text-white shadow-lg border-red-700" : "border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-400 dark:hover:border-red-500"} w-full sm:w-auto transition-all duration-200`}
         >
             <UserX className="w-4 h-4 mr-2" /> Inadimplentes
         </Button>

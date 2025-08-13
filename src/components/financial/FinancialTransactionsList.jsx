@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Edit, Trash2, MoreVertical, Hourglass } from 'lucide-react';
+import ReceiptButton from '@/components/receipts/ReceiptButton';
 import { Button } from '@/components/ui/button';
+import LazyImage from '@/components/common/LazyImage';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -110,7 +112,7 @@ const FinancialTransactionsList = ({ transactions, onEdit, onDelete, isMobile })
                     <td className={`px-6 py-4 whitespace-nowrap text-sm text-muted-foreground ${isMobile ? 'hidden' : 'table-cell'}`}>
                         {transaction.wallet ? (
                             <div className="flex items-center">
-                                {transaction.wallet.icon_url && <img src={transaction.wallet.icon_url} alt={transaction.wallet.name} className="w-4 h-4 mr-2 object-contain" />}
+                                {transaction.wallet.icon_url && <LazyImage src={transaction.wallet.icon_url} alt={transaction.wallet.name} className="w-4 h-4 mr-2 object-contain" />}
                                 <span className="truncate">{transaction.wallet.name}</span>
                             </div>
                         ) : 'N/A'}
@@ -148,13 +150,23 @@ const FinancialTransactionsList = ({ transactions, onEdit, onDelete, isMobile })
                     </td>
                     <td className={`px-6 py-4 whitespace-nowrap text-sm text-muted-foreground ${isMobile ? 'hidden' : 'table-cell'}`}>{transaction.metodo_pagamento || 'N/A'}</td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onEdit(transaction)}><Edit className="mr-2 h-4 w-4" /> Editar</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteRequest(transaction.id)} className="text-red-600 dark:text-red-400 hover:!text-red-600 dark:hover:!text-red-400"><Trash2 className="mr-2 h-4 w-4" /> Excluir</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className="flex items-center gap-2 justify-end">
+                        <ReceiptButton 
+                          transaction={{
+                            ...transaction,
+                            type: transaction.tipo === 'ENTRADA' ? 'entrada' : 'saida'
+                          }}
+                          size="sm"
+                          showDropdown={false}
+                        />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => onEdit(transaction)}><Edit className="mr-2 h-4 w-4" /> Editar</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteRequest(transaction.id)} className="text-red-600 dark:text-red-400 hover:!text-red-600 dark:hover:!text-red-400"><Trash2 className="mr-2 h-4 w-4" /> Excluir</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </td>
                   </tr>
                 ))

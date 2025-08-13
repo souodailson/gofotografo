@@ -74,6 +74,10 @@ const useFinancialLogic = (initialFilter) => {
   }, [initialFilter]);
 
   const financialSummary = useMemo(() => {
+    if (!financialData || !financialData.transactions) {
+      return { totalRevenue: 0, totalExpenses: 0, netBalance: 0 };
+    }
+    
     let transactionsToSummarize = financialData.transactions;
 
     // Apply summary period filter to summary calculations (independent from list filter)

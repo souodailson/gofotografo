@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useModalState } from '@/contexts/ModalStateContext';
 import { format } from 'date-fns';
 import { Wallet, Search, Plus } from 'lucide-react';
+import ReceiptButton from '@/components/receipts/ReceiptButton';
 import { FINANCIAL_CATEGORIES, PAYMENT_METHODS } from '@/lib/financialConstants';
 
 const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess }) => {
@@ -27,6 +28,7 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
     const [metodoPagamento, setMetodoPagamento] = useState('');
     const [walletId, setWalletId] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [savedTransaction, setSavedTransaction] = useState(null);
 
     const resetState = useCallback(() => {
         setDescricao('');
@@ -81,12 +83,15 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
         };
 
         try {
+            let result;
             if (transactionData?.id) {
-                await updateTransaction(transactionData.id, transaction);
+                result = await updateTransaction(transactionData.id, transaction);
                 toast({ title: 'Sucesso!', description: 'Lançamento atualizado.' });
+                setSavedTransaction({ ...transaction, id: transactionData.id });
             } else {
-                await addTransaction(transaction);
+                result = await addTransaction(transaction);
                 toast({ title: 'Sucesso!', description: `Nova ${type.toLowerCase()} adicionada.` });
+                setSavedTransaction({ ...transaction, id: result?.id || Date.now() });
             }
             if(onSaveSuccess) onSaveSuccess();
             onClose();
@@ -299,9 +304,21 @@ const FinancialModal = ({ isOpen, onClose, type, transactionData, onSaveSuccess 
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex justify-end space-x-2 pt-4 flex-shrink-0">
-                                    <Button type="button" variant="ghost" onClick={onClose} disabled={isSaving}>Cancelar</Button>
-                                    <Button type="submit" disabled={isSaving}>{isSaving ? 'Salvando...' : 'Salvar'}</Button>
+                                <div className="flex justify-between items-center pt-4 flex-shrink-0">
+                                    {savedTransaction && (
+                                        <ReceiptButton 
+                                            transaction={{
+                                                ...savedTransaction,
+                                                type: savedTransaction.tipo === 'ENTRADA' ? 'entrada' : 'saida'
+                                            }}
+                                            size="sm"
+                                            variant="outline"
+                                        />
+                                    )}
+                                    <div className={`flex space-x-2 ${!savedTransaction ? 'ml-auto' : ''}`}>
+                                        <Button type="button" variant="ghost" onClick={onClose} disabled={isSaving}>Cancelar</Button>
+                                        <Button type="submit" disabled={isSaving}>{isSaving ? 'Salvando...' : 'Salvar'}</Button>
+                                    </div>
                                 </div>
                                 </form>
                             </div>

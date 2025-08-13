@@ -32,6 +32,10 @@ const ReferralsPage = () => {
   const [affiliateSettings, setAffiliateSettings] = useState(null);
   const [referralLink, setReferralLink] = useState('');
 
+  const generateReferralCode = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  };
+
   const fetchAffiliateData = useCallback(async () => {
     if (!user) return;
     setLoading(true);
@@ -49,8 +53,24 @@ const ReferralsPage = () => {
       setAffiliateData({ referrals: referralsRes.data, commissions: commissionsRes.data });
       setAffiliateSettings(settingsRes.data);
       
-      if(settings?.referral_code) {
-        setReferralLink(`${window.location.origin}/signup?ref=${settings.referral_code}`);
+      let currentReferralCode = settings?.referral_code;
+      
+      // Se não tem código de referral, gerar um
+      if (!currentReferralCode) {
+        currentReferralCode = generateReferralCode();
+        // Atualizar no Supabase
+        const { error: updateError } = await supabase
+          .from('settings')
+          .update({ referral_code: currentReferralCode })
+          .eq('user_id', user.id);
+          
+        if (updateError) {
+          console.error('Erro ao salvar código de referral:', updateError);
+        }
+      }
+      
+      if (currentReferralCode) {
+        setReferralLink(`${window.location.origin}/signup?ref=${currentReferralCode}`);
       }
 
     } catch (error) {

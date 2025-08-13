@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, Users, Briefcase, Wallet, Calendar, BarChart2, LogOut, Settings2, Gem, HardDrive, DollarSign as DollarSignIcon, PiggyBank, Trello, FileText, Gift, DraftingCompass } from 'lucide-react';
+import { LayoutDashboard, Users, Briefcase, Wallet, Calendar, BarChart2, LogOut, Settings2, Gem, HardDrive, DollarSign as DollarSignIcon, PiggyBank, Trello, FileText, Gift, DraftingCompass, Route, Lightbulb, CalendarDays, MessageSquare, MapPin, Target, Trophy, Compass } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -80,9 +80,9 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
   const logoUrlLightTheme = "https://rouvkvcngmsquebokdyg.supabase.co/storage/v1/object/public/gofiles//logotipo%20gofotografo%20claro.png";
   const collapsedLogoUrl = "https://rouvkvcngmsquebokdyg.supabase.co/storage/v1/object/public/gofiles//favicon%20gofotografo.png";
   
-  const userUploadedLogo = settings?.logo;
-  const displayLogoFull = userUploadedLogo || (theme === 'dark' ? logoUrlDarkTheme : logoUrlLightTheme);
-  const displayLogoCollapsed = userUploadedLogo || collapsedLogoUrl;
+  // Sempre usar o logotipo original do sistema
+  const displayLogoFull = theme === 'dark' ? logoUrlDarkTheme : logoUrlLightTheme;
+  const displayLogoCollapsed = collapsedLogoUrl;
 
 
   const handleUserAreaClick = () => {

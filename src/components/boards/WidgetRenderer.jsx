@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,7 @@ const WidgetRenderer = ({ widget, isEditing, autoFocus, onDelete, fetchWidgets }
     debouncedUpdateWidgetContent(widgetId, newContent);
   };
 
+
   const renderSpecificWidget = () => {
     switch (widget.tipo_widget) {
       case 'nota':
@@ -54,26 +55,30 @@ const WidgetRenderer = ({ widget, isEditing, autoFocus, onDelete, fetchWidgets }
   const isGlassmorphism = widget.tipo_widget === 'nota' || widget.tipo_widget === 'lista_tarefas';
 
   return (
-    <div className={cn("h-full w-full", isEditing && "jiggle-animation")}>
-      <div className={cn(
-        "relative rounded-xl shadow-lg border-border/10 overflow-hidden flex flex-col h-full w-full group",
-        isGlassmorphism ? "bg-white/10 dark:bg-black/10 backdrop-blur-sm border" : "bg-card border"
-      )}>
-        {isEditing && (
-          <>
-            <button 
-              onClick={onDelete}
-              className="absolute -top-2 -left-2 z-20 bg-background rounded-full w-6 h-6 flex items-center justify-center shadow-lg cursor-pointer border border-border opacity-0 group-hover:opacity-100 transition-opacity"
-              aria-label="Remover widget"
-            >
-              <X className="w-4 h-4 text-destructive" />
-            </button>
-            <div className="drag-handle absolute top-2 right-2 p-1.5 bg-card/80 rounded-full cursor-grab active:cursor-grabbing z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-              <GripVertical size={16} />
-            </div>
-          </>
+    <div className="h-full w-full relative group">
+      {isEditing && (
+        <>
+          <button 
+            onClick={onDelete}
+            className="absolute -top-2 -left-2 z-50 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center shadow-lg cursor-pointer border-2 border-white opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
+            aria-label="Remover widget"
+          >
+            <X className="w-3 h-3" />
+          </button>
+          
+          <div className="drag-handle absolute -top-2 -right-2 p-1 bg-gray-500 text-white rounded-full cursor-grab active:cursor-grabbing z-50 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-gray-600 hover:scale-110 shadow-lg w-6 h-6 flex items-center justify-center">
+            <GripVertical size={12} className="drop-shadow" />
+          </div>
+        </>
+      )}
+      
+      <div 
+        className={cn(
+          "relative rounded-xl shadow-lg border-border/10 overflow-hidden flex flex-col h-full w-full",
+          isGlassmorphism ? "bg-white/10 dark:bg-black/10 backdrop-blur-sm border" : "bg-card border"
         )}
-        <div className="h-full w-full">
+      >
+        <div className={cn("h-full w-full", isEditing && "no-drag")}>
           {renderSpecificWidget()}
         </div>
       </div>
@@ -81,4 +86,11 @@ const WidgetRenderer = ({ widget, isEditing, autoFocus, onDelete, fetchWidgets }
   );
 };
 
-export default WidgetRenderer;
+export default memo(WidgetRenderer, (prevProps, nextProps) => {
+  return (
+    prevProps.widget.id === nextProps.widget.id &&
+    prevProps.isEditing === nextProps.isEditing &&
+    prevProps.autoFocus === nextProps.autoFocus &&
+    prevProps.widget.conteudo === nextProps.widget.conteudo
+  );
+});

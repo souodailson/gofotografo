@@ -14,8 +14,10 @@ export const ModalStateProvider = ({ children }) => {
   const [openModals, setOpenModals] = useState({
     client: null,
     financial: null,
+    financialWizard: null,
     workflow: null,
     servicePackage: null,
+    product: null,
     equipment: null,
     maintenance: null,
     fixedCost: null,

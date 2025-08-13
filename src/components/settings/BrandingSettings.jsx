@@ -245,11 +245,11 @@ const BrandingSettings = ({ formData, handleInputChange, toast }) => {
               </Button>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">Substitui a marca GO.FOTÓGRAFO quando definido.</p>
+          <p className="text-xs text-muted-foreground mt-1">Seu logotipo será usado para seus relatórios, comprovantes de pagamentos, contratos e outras funcionalidades...</p>
         </div>
         {renderInput('Subdomínio Personalizado', 'subdomain', formData.subdomain, (val) => handleInputChange('subdomain', val), 'meusite', 'text', Link2)}
          <p className="text-xs text-muted-foreground mt-1">
-            Crie um subdomínio como <code className="bg-muted px-1 rounded">meusite.gofotografo.com</code> (funcionalidade futura).
+            Crie um subdomínio como <code className="bg-muted px-1 rounded">meusite.gofotografo.com</code>
           </p>
       </div>
     </motion.div>

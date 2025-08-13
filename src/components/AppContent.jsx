@@ -17,8 +17,10 @@ import { cn } from "@/lib/utils";
 import ClientModal from '@/components/modals/ClientModal';
 import SupplierModal from '@/components/modals/SupplierModal';
 import FinancialModal from '@/components/modals/FinancialModal';
+import FinancialWizardModal from '@/components/modals/FinancialWizardModal';
 import WorkflowModal from '@/components/modals/WorkflowModal';
 import ServicePackageModal from '@/components/modals/ServicePackageModal';
+import ProductModal from '@/components/modals/ProductModal';
 import AnnouncementPopup from '@/components/marketing/AnnouncementPopup';
 import FeatureGuard from '@/components/FeatureGuard';
 
@@ -48,6 +50,17 @@ const ProposalEditorPage = lazy(() => import('@/pages/proposals/ProposalEditorPa
 const BlogPage = lazy(() => import('@/pages/blog/BlogPage'));
 const AvailabilityManagerPage = lazy(() => import('@/pages/AvailabilityManagerPage'));
 const ReferralsPage = lazy(() => import('@/pages/ReferralsPage'));
+const DataManagementPage = lazy(() => import('@/pages/admin/DataManagementPage'));
+const GoMovPage = lazy(() => import('@/pages/GoMovPage'));
+const InspiraPage = lazy(() => import('@/pages/InspiraPage'));
+const SeasonPage = lazy(() => import('@/pages/SeasonPage'));
+const RespostasRapidasPage = lazy(() => import('@/pages/RespostasRapidasPage'));
+const SpotPage = lazy(() => import('@/pages/SpotPage'));
+const RivalPage = lazy(() => import('@/pages/RivalPage'));
+const MetasPage = lazy(() => import('@/pages/MetasPage'));
+const OpportunePage = lazy(() => import('@/pages/OpportunePage'));
+const FindPageSimple = lazy(() => import('@/pages/FindPageSimple'));
+const FindPage = lazy(() => import('@/pages/FindPage'));
 
 const LAST_ACTIVE_TAB_KEY = 'gofotografo_last_active_tab';
 const SIDEBAR_COLLAPSED_KEY = 'gofotografo_sidebar_collapsed';
@@ -113,9 +126,15 @@ const AppContent = ({ children }) => {
   
   const isBoardDetailPage = location.pathname.startsWith('/quadros/');
   const isBoardsPage = location.pathname === '/quadros';
+  
+  // Páginas com gradiente que precisam ocupar toda a tela sem padding
+  const fullScreenGradientPages = ['/rival', '/metas', '/respostas', '/spot', '/gomov', '/season', '/opportune', '/inspira'];
+  const isFullScreenGradientPage = fullScreenGradientPages.includes(location.pathname);
 
   const financialModalState = openModals['financial'];
+  const financialWizardModalState = openModals['financialWizard'];
   const servicePackageModalState = openModals['servicePackage'];
+  const productModalState = openModals['product'];
 
   const logoClaro = "https://rouvkvcngmsquebokdyg.supabase.co/storage/v1/object/public/gofiles//logotipo%20gofotografo%20claro.png";
   const logoEscuro = "https://rouvkvcngmsquebokdyg.supabase.co/storage/v1/object/public/gofiles//logotipo%20fundo%20claro%20go.fotografo%20cor%20.png";
@@ -188,14 +207,16 @@ const AppContent = ({ children }) => {
           id="main-app-container"
           key={location.pathname}
           className={cn(`main-content-container flex-1 transition-all duration-300 ease-in-out`,
-            isMobile ? `p-4 pb-24 ${showMobileHeader ? 'pt-20' : 'pt-4'}` : `p-6 sm:p-8 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`, 
+            isMobile ? `p-4 pb-24 ${showMobileHeader ? 'pt-20' : 'pt-4'}` : 
+            isFullScreenGradientPage ? `${sidebarCollapsed ? 'ml-16' : 'ml-64'}` : 
+            `p-6 sm:p-8 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`, 
             'overflow-y-auto',
             isBoardDetailPage && 'fundo-quadro-ativo p-0 sm:p-0',
             isBoardsPage && 'pagina-quadros'
           )}
           style={pageStyle}
         >
-          <div className={cn("h-auto min-h-full", !isBoardDetailPage && "dashboard-page-container")}> 
+          <div className={cn("h-auto min-h-full", !isBoardDetailPage && !isFullScreenGradientPage && "dashboard-page-container")}> 
             <Suspense fallback={<FullScreenLoader />}>
               <AnimatePresence mode="wait">
                 <motion.div
@@ -234,6 +255,16 @@ const AppContent = ({ children }) => {
 
                       <Route path="/availability-manager" element={<FeatureGuard featureName="agenda_pro"><AvailabilityManagerPage isMobile={isMobile} /></FeatureGuard>} />
                       <Route path="/referrals" element={<ReferralsPage />} />
+                      <Route path="/gomov" element={<GoMovPage />} />
+                      <Route path="/inspira" element={<InspiraPage />} />
+                      <Route path="/season" element={<SeasonPage />} />
+                      <Route path="/respostas-rapidas" element={<RespostasRapidasPage />} />
+                      <Route path="/spot" element={<SpotPage />} />
+                      <Route path="/rival" element={<RivalPage />} />
+                      <Route path="/metas" element={<MetasPage />} />
+                      <Route path="/opportune" element={<OpportunePage />} />
+                      <Route path="/control-access" element={<DataManagementPage />} />
+                      <Route path="/find" element={<FindPage />} />
                       
                       <Route path="/settings" element={<Settings isMobile={isMobile} />} />
                       <Route path="/account-settings" element={<AccountSettings isMobile={isMobile} />} />
@@ -268,11 +299,32 @@ const AppContent = ({ children }) => {
         )}
       </AnimatePresence>
       <AnimatePresence>
+        {financialWizardModalState?.isOpen && (
+          <FinancialWizardModal
+            isOpen={financialWizardModalState.isOpen}
+            onClose={() => closeModal('financialWizard')}
+            type={financialWizardModalState.type}
+            transactionData={financialWizardModalState.transaction}
+            onSaveSuccess={async () => await refreshData()}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
         {servicePackageModalState?.isOpen && (
           <ServicePackageModal
             isOpen={servicePackageModalState.isOpen}
             onClose={() => closeModal('servicePackage')}
             servicePackage={servicePackageModalState.servicePackage}
+            onSaveSuccess={async () => await refreshData()}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {productModalState?.isOpen && (
+          <ProductModal
+            isOpen={productModalState.isOpen}
+            onClose={() => closeModal('product')}
+            product={productModalState.product}
             onSaveSuccess={async () => await refreshData()}
           />
         )}

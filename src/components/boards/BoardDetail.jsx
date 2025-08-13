@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useData } from '@/contexts/DataContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, Trash2, Palette, Upload, Trello } from 'lucide-react';
+import { Loader2, Trash2, Palette, Upload, Trello, Archive, Share2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import BoardKanbanView from './BoardKanbanView';
@@ -55,6 +55,10 @@ const BoardDetail = ({ setPageStyle }) => {
   const [boardName, setBoardName] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  const [isSharing, setIsSharing] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const fileInputRef = useRef(null);
   
   const updatePageStyle = useCallback((boardData) => {
@@ -92,6 +96,13 @@ const BoardDetail = ({ setPageStyle }) => {
       setBoard(boardData);
       setBoardName(boardData.nome_quadro);
       updatePageStyle(boardData);
+      
+      // Verificar se já tem share_id e está público
+      if (boardData.share_id && boardData.is_public) {
+        setShareUrl(`${window.location.origin}/public/board/${boardData.share_id}`);
+      } else {
+        setShareUrl(''); // Garantir que começa vazio se não está compartilhado
+      }
     } catch (error) {
       if (error && error.code !== 'PGRST116') {
         toast({ title: 'Erro ao carregar quadro', description: error.message, variant: 'destructive' });
@@ -171,6 +182,102 @@ const BoardDetail = ({ setPageStyle }) => {
       setIsUploading(false);
     }
   };
+  
+  const handleShare = async () => {
+    if (shareUrl) {
+      // Se já está compartilhado, copiar URL
+      await copyToClipboard();
+      return;
+    }
+    
+    setIsSharing(true);
+    try {
+      // Gerar ID único para compartilhamento
+      const shareId = `board_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      console.log('🔗 Criando compartilhamento com ID:', shareId);
+      
+      const { data, error } = await supabase
+        .from('quadros')
+        .update({ 
+          share_id: shareId, 
+          is_public: true,
+          shared_at: new Date().toISOString()
+        })
+        .eq('id', boardId)
+        .select()
+        .single();
+        
+      if (error) {
+        console.error('❌ Erro ao atualizar quadro:', error);
+        throw error;
+      }
+      
+      console.log('✅ Quadro atualizado:', data);
+      
+      const newShareUrl = `${window.location.origin}/public/board/${shareId}`;
+      setShareUrl(newShareUrl);
+      
+      // Atualizar o estado local do board
+      setBoard(prev => ({ 
+        ...prev, 
+        share_id: shareId, 
+        is_public: true, 
+        shared_at: new Date().toISOString() 
+      }));
+      
+      toast({ 
+        title: 'Quadro compartilhado!', 
+        description: 'Link copiado para a área de transferência' 
+      });
+      
+      // Copiar automaticamente para área de transferência
+      await navigator.clipboard.writeText(newShareUrl);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+      
+    } catch (error) {
+      console.error('❌ Erro no handleShare:', error);
+      toast({ 
+        title: 'Erro ao compartilhar', 
+        description: error.message, 
+        variant: 'destructive' 
+      });
+    } finally {
+      setIsSharing(false);
+    }
+  };
+  
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+      toast({ title: 'Link copiado!', description: 'URL copiada para a área de transferência' });
+    } catch (error) {
+      toast({ title: 'Erro ao copiar', description: 'Não foi possível copiar o link', variant: 'destructive' });
+    }
+  };
+  
+  const handleStopSharing = async () => {
+    try {
+      const { error } = await supabase
+        .from('quadros')
+        .update({ 
+          share_id: null, 
+          is_public: false,
+          shared_at: null
+        })
+        .eq('id', boardId);
+        
+      if (error) throw error;
+      
+      setShareUrl('');
+      toast({ title: 'Compartilhamento desativado', description: 'O quadro não está mais público' });
+      
+    } catch (error) {
+      toast({ title: 'Erro ao desativar', description: error.message, variant: 'destructive' });
+    }
+  };
 
   if (loading) {
     return (
@@ -219,6 +326,83 @@ const BoardDetail = ({ setPageStyle }) => {
           </div>
           <div className="flex items-center gap-2">
             <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-white hover:bg-white/20"
+                    onClick={() => setShowArchived(!showArchived)}
+                  >
+                    <Archive className="w-5 h-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{showArchived ? 'Ocultar' : 'Mostrar'} Arquivados</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              <DropdownMenu>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        disabled={isSharing} 
+                        className="text-white hover:bg-white/20"
+                      >
+                        {isSharing ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : isCopied ? (
+                          <Check className="w-5 h-5 text-green-400" />
+                        ) : (
+                          <Share2 className="w-5 h-5" />
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Compartilhar Quadro</p>
+                  </TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel>Compartilhamento</DropdownMenuLabel>
+                  {shareUrl ? (
+                    <>
+                      <div className="p-2">
+                        <p className="text-xs text-muted-foreground mb-2">Link público ativo:</p>
+                        <div className="flex items-center gap-2">
+                          <Input 
+                            value={shareUrl} 
+                            readOnly 
+                            className="text-xs"
+                          />
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={copyToClipboard}
+                            className="flex-shrink-0"
+                          >
+                            {isCopied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleStopSharing} className="text-red-500">
+                        <Share2 className="w-4 h-4 mr-2" />
+                        <span>Desativar compartilhamento</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem onClick={handleShare}>
+                      <Share2 className="w-4 h-4 mr-2" />
+                      <span>Compartilhar publicamente</span>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
               <DropdownMenu>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -291,8 +475,8 @@ const BoardDetail = ({ setPageStyle }) => {
         </div>
       </header>
       
-      <div className="flex-grow overflow-auto pt-20">
-        <BoardKanbanView board={board} />
+      <div className="flex-grow pt-20 h-full">
+        <BoardKanbanView board={board} showArchived={showArchived} />
       </div>
     </div>
   );

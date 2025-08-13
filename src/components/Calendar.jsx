@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Settings, ListChecks } from 'lucide-react';
+import { Plus, Settings, ListChecks, CalendarDays, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useData } from '@/contexts/DataContext';
@@ -334,6 +334,22 @@ const CalendarComponent = ({ isMobile: propIsMobile, setActiveTab }) => {
             >
               <Settings className="w-4 h-4 mr-2" />
               Agenda PRO
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => window.open('/season', '_blank')}
+              className="w-full sm:w-auto bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 hover:bg-gradient-to-r hover:from-yellow-100 hover:to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 dark:border-yellow-700"
+            >
+              <CalendarDays className="w-4 h-4 mr-2 text-yellow-600" />
+              SEASON
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => window.open('/opportune', '_blank')}
+              className="w-full sm:w-auto bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 dark:border-purple-700"
+            >
+              <Compass className="w-4 h-4 mr-2 text-purple-600" />
+              OPPORTUNE
             </Button>
             <GoogleAuthControls
               googleTokens={googleTokens}

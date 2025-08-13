@@ -1,0 +1,1 @@
+import{au as r,av as a,aw as o,j as e,R as s,ax as t}from"./index-B959_7_o.js";a.workerSrc=`//cdnjs.cloudflare.com/ajax/libs/pdf.js/${r}/pdf.worker.min.mjs`;o.createRoot(document.getElementById("root")).render(e.jsx(s.StrictMode,{children:e.jsx(t,{})}));

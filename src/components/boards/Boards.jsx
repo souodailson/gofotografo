@@ -13,6 +13,7 @@ import BoardsHeader from './BoardsHeader';
 import AddBoardModal from './modals/AddBoardModal';
 import DeleteWidgetDialog from './modals/DeleteWidgetDialog';
 import WidgetRenderer from './WidgetRenderer';
+import './boards.css';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -245,7 +246,7 @@ const Boards = ({ setSidebarCollapsed }) => {
         onAddBoard={() => setIsModalOpen(true)}
       />
 
-      <div className={cn("flex-grow overflow-auto relative", isEditing && "modo-edicao-ativo")}>
+      <div className={cn("flex-grow overflow-auto relative boards-container", isEditing && "modo-edicao-ativo")}>
         {loading ? (
             <div className="flex items-center justify-center h-full"><Loader2 className="w-12 h-12 animate-spin text-primary" /></div>
         ) : isMounted ? (
@@ -259,10 +260,24 @@ const Boards = ({ setSidebarCollapsed }) => {
             isResizable={isEditing}
             draggableHandle=".drag-handle"
             compactType="vertical"
+            margin={[16, 16]}
+            containerPadding={[16, 16]}
+            useCSSTransforms={true}
+            transformScale={1}
+            draggableCancel=".no-drag"
             resizeHandle={isEditing ? undefined : <span className="react-resizable-handle hidden"></span>}
+            style={{ transition: 'all 0.3s ease-in-out' }}
           >
             {widgets.map(widget => (
-              <div key={widget.id} className="group transition-transform duration-300 ease-in-out hover:scale-103 hover:z-10">
+              <div 
+                key={widget.id} 
+                className={cn(
+                  "group transition-all duration-300 ease-in-out",
+                  isEditing ? 
+                    "hover:scale-105 hover:z-20 hover:shadow-2xl hover:shadow-blue-500/20" : 
+                    "hover:scale-103 hover:z-10 hover:shadow-lg"
+                )}
+              >
                 <WidgetRenderer
                   widget={widget}
                   isEditing={isEditing}

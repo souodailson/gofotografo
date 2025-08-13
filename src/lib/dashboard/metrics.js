@@ -25,12 +25,32 @@ export function getDashboardMetrics(
 ) {
   const now = new Date();
 
+  // Validação de entrada
+  if (!Array.isArray(transactions)) {
+    transactions = [];
+  }
+  if (!Array.isArray(workflowCards)) {
+    workflowCards = [];
+  }
+  if (!Array.isArray(clients)) {
+    clients = [];
+  }
+  if (!Array.isArray(equipments)) {
+    equipments = [];
+  }
+
   // Filtra transações pagas
   const paidTransactions = transactions.filter((t) => t.status === 'PAGO');
   // Filtra transações pagas no mês atual
-  const thisMonthTransactions = paidTransactions.filter((t) =>
-    isSameMonth(parseISO(t.data_recebimento || t.data || t.created_at), now)
-  );
+  const thisMonthTransactions = paidTransactions.filter((t) => {
+    const dateStr = t.data_recebimento || t.data || t.created_at;
+    if (!dateStr) return false;
+    try {
+      return isSameMonth(parseISO(dateStr), now);
+    } catch {
+      return false;
+    }
+  });
 
   // Soma de receitas e despesas totais
   const totalRevenue = paidTransactions
@@ -53,16 +73,22 @@ export function getDashboardMetrics(
   const profitThisMonth = revenueThisMonth - expensesThisMonth;
 
   // Valores pendentes a receber (workflow + transações)
-  const pendingToReceive =
-    workflowCards
-      .filter(
-        (card) =>
-          card.status !== 'concluido' && card.status !== 'arquivado'
-      )
-      .reduce((sum, card) => sum + (card.pending_amount || 0), 0) +
-    transactions
-      .filter((t) => t.tipo === 'ENTRADA' && t.status === 'PENDENTE')
-      .reduce((sum, t) => sum + (Number(t.valor) || 0), 0);
+  const workflowPendingAmount = workflowCards
+    .filter(
+      (card) =>
+        card.status !== 'concluido' && card.status !== 'arquivado' && !card.archived
+    )
+    .reduce((sum, card) => {
+      const cardValue = Number(card.value) || 0;
+      const pendingAmount = Number(card.pending_amount) || 0;
+      return sum + (pendingAmount > 0 ? pendingAmount : cardValue);
+    }, 0);
+  
+  const transactionsPendingAmount = transactions
+    .filter((t) => t.tipo === 'ENTRADA' && t.status === 'PENDENTE')
+    .reduce((sum, t) => sum + (Number(t.valor) || 0), 0);
+  
+  const pendingToReceive = workflowPendingAmount + transactionsPendingAmount;
 
   // Despesas pendentes com vencimento futuro
   const futurePendingPayments = transactions
@@ -70,6 +96,7 @@ export function getDashboardMetrics(
       (t) =>
         t.tipo === 'SAIDA' &&
         t.status === 'PENDENTE' &&
+        t.data_vencimento &&
         new Date(t.data_vencimento) > now
     )
     .reduce((sum, t) => sum + (Number(t.valor) || 0), 0);
@@ -79,6 +106,7 @@ export function getDashboardMetrics(
     .filter(
       (t) =>
         t.status === 'AGUARDANDO_LIBERACAO' &&
+        t.release_date &&
         new Date(t.release_date) > now
     )
     .reduce((sum, t) => sum + (Number(t.valor) || 0), 0);
@@ -102,11 +130,16 @@ export function getDashboardMetrics(
 
   // Workflow: cards em andamento e agendados
   const workInProgress = workflowCards.filter(
-    (c) => c.status === 'em-andamento'
+    (c) => c.status === 'em-andamento' && !c.archived
   ).length;
-  const scheduledThisMonth = workflowCards.filter(
-    (c) => c.date && isSameMonth(parseISO(c.date), now)
-  ).length;
+  const scheduledThisMonth = workflowCards.filter((c) => {
+    if (!c.date || c.archived) return false;
+    try {
+      return isSameMonth(parseISO(c.date), now);
+    } catch {
+      return false;
+    }
+  }).length;
 
   // Cálculo de conversão: leads válidos x convertidos
   const invalidStatuses = ['arquivado', 'excluido', 'cancelado', 'perdido'];
@@ -145,14 +178,20 @@ export function getDashboardMetrics(
     monthlyExpenses[key] = 0;
   }
   paidTransactions.forEach((t) => {
-    const date = parseISO(t.data_recebimento || t.data || t.created_at);
-    const key = `${date.getMonth() + 1}/${date.getFullYear()}`;
-    if (!Object.prototype.hasOwnProperty.call(monthlyRevenue, key))
-      return;
-    if (t.tipo === 'ENTRADA') {
-      monthlyRevenue[key] += Number(t.valor) || 0;
-    } else if (t.tipo === 'SAIDA') {
-      monthlyExpenses[key] += Number(t.valor) || 0;
+    const dateStr = t.data_recebimento || t.data || t.created_at;
+    if (!dateStr) return;
+    try {
+      const date = parseISO(dateStr);
+      const key = `${date.getMonth() + 1}/${date.getFullYear()}`;
+      if (!Object.prototype.hasOwnProperty.call(monthlyRevenue, key))
+        return;
+      if (t.tipo === 'ENTRADA') {
+        monthlyRevenue[key] += Number(t.valor) || 0;
+      } else if (t.tipo === 'SAIDA') {
+        monthlyExpenses[key] += Number(t.valor) || 0;
+      }
+    } catch {
+      // Ignora datas inválidas
     }
   });
 

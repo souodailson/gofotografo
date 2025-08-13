@@ -2,12 +2,14 @@ import React, {
   useState,
   useEffect,
   useMemo,
+  memo,
 } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { motion } from 'framer-motion';
 import { cloneDeep } from 'lodash';
+import { LazyVisibilityLoader } from '@/components/common/LazyComponentLoader';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardCard from '@/components/dashboard/DashboardCard';
@@ -473,12 +475,17 @@ const greetingMemo = useMemo(
                 </>
               )}
               <div className="flex-grow h-full w-full">
-                <DashboardCard
-                  cardId={item.i}
-                  layout={item}
-                  isEditing={isEditing}
-                  setActiveTab={setActiveTab}
-                />
+                <LazyVisibilityLoader 
+                  threshold={0.1}
+                  className="h-full w-full"
+                >
+                  <DashboardCard
+                    cardId={item.i}
+                    layout={item}
+                    isEditing={isEditing}
+                    setActiveTab={setActiveTab}
+                  />
+                </LazyVisibilityLoader>
               </div>
             </div>
           );
@@ -488,4 +495,4 @@ const greetingMemo = useMemo(
   );
 };
 
-export default Dashboard;
+export default memo(Dashboard);

@@ -10,6 +10,7 @@ import RecentProposals from '@/pages/proposals/components/studio/RecentProposals
 import RecentContracts from '@/pages/proposals/components/studio/RecentContracts';
 import CreateContractModal from '@/pages/proposals/components/studio/CreateContractModal';
 import TemplateGalleryModal from '@/pages/proposals/components/studio/TemplateGalleryModal';
+import ProposalTemplateGalleryModal from '@/pages/proposals/components/studio/ProposalTemplateGalleryModal';
 
 const StudioPage = () => {
   const navigate = useNavigate();
@@ -19,12 +20,58 @@ const StudioPage = () => {
   const [isCreateContractModalOpen, setIsCreateContractModalOpen] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [contractTemplates, setContractTemplates] = useState([]);
-  
-  const handleComingSoon = () => {
-    toast({
-      title: "🚧 Em breve!",
-      description: "Esta funcionalidade ainda está em desenvolvimento. Fique de olho!",
-    });
+  const [isProposalTemplateModalOpen, setIsProposalTemplateModalOpen] = useState(false);
+  const [proposalTemplates, setProposalTemplates] = useState([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+
+  const handleViewProposalTemplates = async () => {
+    setLoadingTemplates(true);
+    try {
+      const { data, error } = await supabase
+        .from('templates_propostas')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setProposalTemplates(data);
+        setIsProposalTemplateModalOpen(true);
+      } else {
+        toast({
+          title: "Nenhum template encontrado",
+          description: "Não há templates de proposta publicados no momento.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao carregar templates",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  const handleUseProposalTemplate = async (template) => {
+    try {
+      // Navegar para o editor com o template selecionado
+      navigate('/studio/proposals/new', { 
+        state: { 
+          templateData: template,
+          fromTemplate: true 
+        }
+      });
+      setIsProposalTemplateModalOpen(false);
+    } catch (error) {
+      toast({
+        title: "Erro ao usar template",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCreateContract = async (type) => {
@@ -111,7 +158,8 @@ const StudioPage = () => {
       <StudioHeader 
         onNewProposal={() => navigate('/studio/proposals/new')}
         onNewContract={() => setIsCreateContractModalOpen(true)}
-        onViewTemplates={handleComingSoon}
+        onViewTemplates={handleViewProposalTemplates}
+        loadingTemplates={loadingTemplates}
       />
 
       <RecentProposals 
@@ -137,6 +185,13 @@ const StudioPage = () => {
         onOpenChange={setIsTemplateModalOpen}
         templates={contractTemplates}
         onUseTemplate={handleUseTemplate}
+      />
+
+      <ProposalTemplateGalleryModal
+        isOpen={isProposalTemplateModalOpen}
+        onOpenChange={setIsProposalTemplateModalOpen}
+        templates={proposalTemplates}
+        onUseTemplate={handleUseProposalTemplate}
       />
     </motion.div>
   );

@@ -13,6 +13,7 @@ import FullScreenLoader from '@/components/FullScreenLoader';
 import KeepAlive from '@/components/KeepAlive.jsx';
 import ErrorBoundary from '@/components/ErrorBoundary.jsx';
 import GlobalNotifications from '@/components/GlobalNotifications';
+import SubdomainHandler from '@/components/SubdomainHandler';
 
 const LandingPage = lazy(() => import('@/pages/LandingPage'));
 const PrivacyPolicyPage = lazy(() => import('@/pages/PrivacyPolicyPage'));
@@ -24,6 +25,8 @@ const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
 const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'));
 const PublicFormPage = lazy(() => import('@/pages/PublicFormPage'));
 const PublicBookingPage = lazy(() => import('@/pages/PublicBookingPage'));
+const PublicBoardPage = lazy(() => import('@/pages/PublicBoardPage'));
+const PublicPortfolioPage = lazy(() => import('@/pages/PublicPortfolioPage'));
 const AssinafyWebhookPage = lazy(() => import('@/pages/contracts/AssinafyWebhookPage'));
 const MaintenancePage = lazy(() => import('@/pages/MaintenancePage'));
 const BlogPage = lazy(() => import('@/pages/blog/BlogPage'));
@@ -118,6 +121,22 @@ const AppRoutes = () => {
         element={
           <Suspense fallback={<FullScreenLoader />}>
             <PublicBookingPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/public/board/:shareId"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <PublicBoardPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/portfolio/:userId"
+        element={
+          <Suspense fallback={<FullScreenLoader />}>
+            <PublicPortfolioPage />
           </Suspense>
         }
       />
@@ -280,9 +299,11 @@ function App() {
             <ModalStateProvider>
               <ErrorLoggingProvider>
                 <ErrorBoundary>
-                  <KeepAlive />
-                  <PWAInstaller />
-                  <AppRoutes />
+                  <SubdomainHandler>
+                    <KeepAlive />
+                    <PWAInstaller />
+                    <AppRoutes />
+                  </SubdomainHandler>
                 </ErrorBoundary>
               </ErrorLoggingProvider>
             </ModalStateProvider>

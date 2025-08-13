@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Settings, Check, X, Plus, RotateCcw, Eye, EyeOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Settings, Check, X, Plus, RotateCcw, Eye, EyeOff, Target, Trophy } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +31,8 @@ const DashboardHeader = ({
 }) => {
   const availableCardsToAdd = Object.keys(initialCardConfigMemo).filter(key => !visibleCards.includes(key));
   const { isMobile } = useMobileLayout();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   return (
     <div className="dashboard-header-container flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
@@ -47,18 +51,36 @@ const DashboardHeader = ({
       </motion.div>
       <div className="dashboard-controls-container flex items-center space-x-2">
         {!isMobile && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={onToggleBalances}>
-                  {showBalances ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{showBalances ? 'Ocultar saldos' : 'Mostrar saldos'}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/rival')}
+              className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 hover:bg-gradient-to-r hover:from-orange-100 hover:to-red-100 dark:from-orange-900/20 dark:to-red-900/20 dark:border-orange-700"
+            >
+              <Target className="w-4 h-4 mr-2 text-orange-600" />
+              RIVAL
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/metas')}
+              className="bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200 hover:bg-gradient-to-r hover:from-yellow-100 hover:to-amber-100 dark:from-yellow-900/20 dark:to-amber-900/20 dark:border-yellow-700"
+            >
+              <Trophy className="w-4 h-4 mr-2 text-yellow-600" />
+              METAS
+            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={onToggleBalances}>
+                    {showBalances ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{showBalances ? 'Ocultar saldos' : 'Mostrar saldos'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </>
         )}
 
         {isPersonalizing ? (

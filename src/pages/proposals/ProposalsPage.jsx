@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Edit, Trash2, Share2, Eye, FileText, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import LazyImage from '@/components/common/LazyImage';
 import { useData } from '@/contexts/DataContext';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
@@ -77,7 +78,7 @@ const ProposalCard = ({ proposal, onShare, onDelete, onPreview }) => {
       className="relative aspect-[9/16] w-full overflow-hidden rounded-xl shadow-lg group cursor-pointer"
       onClick={handleCardClick}
     >
-      <img src={coverImage} alt={proposal.nome_da_proposta} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+      <LazyImage src={coverImage} alt={proposal.nome_da_proposta} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
       
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
       
@@ -171,7 +172,7 @@ const TemplateCard = ({ template, onSelect }) => {
         className="relative aspect-[4/3] w-full overflow-hidden rounded-xl shadow-lg group cursor-pointer"
         onClick={() => onSelect(template.id)}
       >
-        <img src={coverImage} alt={template.template_name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <LazyImage src={coverImage} alt={template.template_name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
             <Button>Usar este modelo</Button>

@@ -4,6 +4,7 @@ import { DollarSign, TrendingUp, TrendingDown, ShieldCheck, Landmark, Wallet, Re
 import useCardHoverEffect from '@/hooks/useCardHoverEffect';
 import { cn } from '@/lib/utils';
 import useMobileLayout from '@/hooks/useMobileLayout';
+import LazyImage from '@/components/common/LazyImage';
 
 const IconMap = {
   DollarSign,
@@ -58,7 +59,7 @@ const StatCard = ({ title, value, icon, color, onClick, isPersonalizing, layout,
       <div className="flex justify-between items-start">
         <h3 className={cn('font-medium text-muted-foreground truncate', responsiveClasses.title)} title={title}>{title}</h3>
         {iconUrl ? (
-          <img src={iconUrl} alt={title} className={cn(responsiveClasses.icon, 'object-contain')} />
+          <LazyImage src={iconUrl} alt={title} className={cn(responsiveClasses.icon, 'object-contain')} />
         ) : (
           <IconComponent className={cn(responsiveClasses.icon, color)} />
         )}

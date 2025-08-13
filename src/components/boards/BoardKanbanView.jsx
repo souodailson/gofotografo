@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import BoardColumn from './BoardColumn';
 
-const BoardKanbanView = ({ board }) => {
+const BoardKanbanView = ({ board, showArchived = false }) => {
   const { user } = useData();
   const { toast } = useToast();
 
@@ -29,18 +29,37 @@ const BoardKanbanView = ({ board }) => {
 
       if (columnsError) throw columnsError;
 
-      const sortedColumns = columnsData.map(col => ({
-        ...col,
-        cards: (col.quadro_cards || []).sort((a, b) => a.ordem - b.ordem),
-      }));
+      const sortedColumns = columnsData.map(col => {
+        let cards = col.quadro_cards || [];
+        
+        if (showArchived) {
+          // Mostrar apenas cards arquivados
+          cards = cards.filter(card => card.arquivado === true);
+        } else {
+          // Mostrar apenas cards não arquivados (incluindo cards sem o campo arquivado)
+          cards = cards.filter(card => !card.arquivado);
+        }
+        
+        return {
+          ...col,
+          cards: cards.sort((a, b) => (a.ordem || 0) - (b.ordem || 0)),
+        };
+      });
 
       setColumns(sortedColumns);
+      
+      // Debug para verificar cards arquivados
+      if (showArchived) {
+        const totalArchived = columnsData.reduce((total, col) => 
+          total + (col.quadro_cards || []).filter(card => card.arquivado === true).length, 0);
+        console.log(`Mostrando ${totalArchived} cards arquivados`);
+      }
     } catch (error) {
       toast({ title: 'Erro ao carregar colunas', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
-  }, [board?.id, user, toast]);
+  }, [board?.id, user, toast, showArchived]);
 
   useEffect(() => {
     fetchBoardData();
@@ -72,9 +91,9 @@ const BoardKanbanView = ({ board }) => {
 
   const onDragEnd = async (result) => {
     const { destination, source, draggableId, type } = result;
-    if (!destination) return;
-
-    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+    
+    // Se não há destino ou a posição não mudou, sair
+    if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
       return;
     }
     
@@ -98,43 +117,91 @@ const BoardKanbanView = ({ board }) => {
     }
 
     if (type === 'CARD') {
-        const startColumn = columns.find(col => col.id.toString() === source.droppableId);
-        const endColumn = columns.find(col => col.id.toString() === destination.droppableId);
+      const sourceColumn = columns.find(col => col.id.toString() === source.droppableId);
+      const destColumn = columns.find(col => col.id.toString() === destination.droppableId);
 
-        if (!startColumn || !endColumn) return;
+      if (!sourceColumn || !destColumn) return;
 
-        const startCards = Array.from(startColumn.cards);
-        const [movedCard] = startCards.splice(source.index, 1);
+      // Criar cópias dos arrays de cards
+      const sourceCards = [...sourceColumn.cards];
+      const destCards = sourceColumn.id === destColumn.id ? sourceCards : [...destColumn.cards];
+      
+      // Encontrar o card que está sendo movido
+      const [movedCard] = sourceCards.splice(source.index, 1);
+      
+      // Inserir o card na nova posição
+      destCards.splice(destination.index, 0, movedCard);
 
-        // Optimistic UI Update
-        if (startColumn.id === endColumn.id) {
-            // Moving within the same column
-            startCards.splice(destination.index, 0, movedCard);
-            const newColumns = columns.map(c => c.id === startColumn.id ? { ...c, cards: startCards } : c);
-            setColumns(newColumns);
+      // Atualizar o estado imediatamente (optimistic update)
+      const newColumns = columns.map(col => {
+        if (col.id === sourceColumn.id && col.id === destColumn.id) {
+          // Mesma coluna
+          return { ...col, cards: destCards };
+        } else if (col.id === sourceColumn.id) {
+          // Coluna de origem
+          return { ...col, cards: sourceCards };
+        } else if (col.id === destColumn.id) {
+          // Coluna de destino
+          return { ...col, cards: destCards };
+        }
+        return col;
+      });
+
+      setColumns(newColumns);
+
+      // Atualizar banco de dados em background
+      try {
+        if (sourceColumn.id === destColumn.id) {
+          // Mesma coluna - reorganizar ordens
+          const updates = destCards.map((card, index) =>
+            supabase
+              .from('quadro_cards')
+              .update({ ordem: index })
+              .eq('id', card.id)
+          );
+          await Promise.all(updates);
         } else {
-            // Moving to a different column
-            const endCards = Array.from(endColumn.cards);
-            endCards.splice(destination.index, 0, movedCard);
-            const newColumns = columns.map(c => {
-                if (c.id === startColumn.id) return { ...c, cards: startCards };
-                if (c.id === endColumn.id) return { ...c, cards: endCards };
-                return c;
-            });
-            setColumns(newColumns);
+          // Colunas diferentes
+          // 1. Mover o card para nova coluna
+          await supabase
+            .from('quadro_cards')
+            .update({ 
+              coluna_id: destColumn.id,
+              ordem: destination.index
+            })
+            .eq('id', draggableId);
+
+          // 2. Reorganizar coluna de origem
+          const sourceUpdates = sourceCards.map((card, index) =>
+            supabase
+              .from('quadro_cards')
+              .update({ ordem: index })
+              .eq('id', card.id)
+          );
+
+          // 3. Reorganizar coluna de destino
+          const destUpdates = destCards.map((card, index) =>
+            supabase
+              .from('quadro_cards')
+              .update({ ordem: index })
+              .eq('id', card.id)
+          );
+
+          await Promise.all([...sourceUpdates, ...destUpdates]);
         }
 
-        // Database Update
-        try {
-            await supabase.rpc('move_card', {
-                card_id_to_move: draggableId,
-                new_coluna_id: endColumn.id,
-                new_ordem: destination.index
-            });
-        } catch (error) {
-            toast({ title: 'Erro ao mover o cartão', description: 'Ocorreu um erro ao salvar a nova posição. O quadro será atualizado.', variant: 'destructive' });
-            fetchBoardData(); // Revert optimistic update on error
-        }
+        console.log('✅ Card movido e salvo com sucesso');
+
+      } catch (error) {
+        console.error('❌ Erro ao salvar posição do cartão:', error);
+        // Em caso de erro, reverter para o estado original
+        fetchBoardData();
+        toast({ 
+          title: 'Erro ao mover cartão', 
+          description: 'Posição restaurada', 
+          variant: 'destructive' 
+        });
+      }
     }
   };
   
@@ -151,7 +218,7 @@ const BoardKanbanView = ({ board }) => {
   }
 
   return (
-    <div className="flex-grow overflow-x-auto overflow-y-hidden h-full">
+    <div className="w-full h-full overflow-x-auto overflow-y-hidden scrollbar-hide">
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="board" type="COLUMN" direction="horizontal">
           {(provided) => (

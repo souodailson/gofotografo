@@ -1,0 +1,105 @@
+/* Boards Drag & Drop Animations */
+
+.react-grid-item {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.react-grid-item.react-draggable-dragging {
+  z-index: 1000 !important;
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.react-grid-item:hover {
+  z-index: 100;
+}
+
+.react-grid-placeholder {
+  display: none !important;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.02);
+  }
+}
+
+/* Modo edição ativo */
+.modo-edicao-ativo .react-grid-item {
+  border: 1px dashed rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+}
+
+.modo-edicao-ativo .react-grid-item:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* Animação jiggle */
+@keyframes jiggle {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(1deg); }
+  50% { transform: rotate(-1deg); }
+  75% { transform: rotate(1deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.jiggle-animation {
+  animation: jiggle 0.5s ease-in-out;
+}
+
+/* Melhor drag handle */
+.drag-handle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.drag-handle:hover::before {
+  opacity: 1;
+}
+
+/* Scrollbar personalizada para boards */
+.boards-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.boards-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.boards-container::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 4px;
+}
+
+.boards-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .drag-handle {
+    opacity: 1 !important;
+    background: rgba(59, 130, 246, 0.8) !important;
+  }
+  
+  .react-grid-item.react-draggable-dragging {
+    transform: scale(1.02);
+  }
+}

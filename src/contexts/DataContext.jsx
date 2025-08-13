@@ -9,6 +9,7 @@ import { useAffiliateManager } from './useAffiliateManager';
 import { updateWorkflowCard as updateWorkflowCardDb, deleteWorkflowCard as deleteWorkflowCardDb, addCommentToWorkflowCard as addCommentDb } from '@/lib/db/workflowApi.js';
 import { addTransaction as addTransactionDb, updateTransaction as updateTransactionDb, deleteTransaction as deleteTransactionDb, getTransactionsByWorkflowId } from '@/lib/db/financialApi.js';
 import { addServicePackage as addServicePackageDb, updateServicePackage as updateServicePackageDb, deleteServicePackage as deleteServicePackageDb } from '@/lib/db/servicePackagesApi.js';
+import { addProduct as addProductDb, updateProduct as updateProductDb, deleteProduct as deleteProductDb } from '@/lib/db/productsApi.js';
 import { getOrcamentosByClientId, addOrcamento as addOrcamentoDb, updateOrcamento as updateOrcamentoDb, deleteOrcamento as deleteOrcamentoDb } from '@/lib/db/orcamentosApi.js';
 import { parseISO, format as formatDateFns, addDays } from 'date-fns';
 import { addEquipmentDb, updateEquipmentDb, deleteEquipmentDb, addMaintenanceDb } from '@/lib/db/mySetupApi';
@@ -31,7 +32,7 @@ export const DataProvider = ({ children }) => {
   const { user, session, settings, loadingAuth, setSettings, logout } = useAuth();
   
   const {
-    clients, suppliers, workflowCards, financialData, servicePackages, equipments, maintenances, 
+    clients, suppliers, workflowCards, financialData, servicePackages, products, equipments, maintenances, 
     fixedCosts, pricedServices, savingGoals, pendingReserveAllocations, upcomingReminders,
     clientContracts, clientOrcamentos, availabilitySlots, proposals, blogPosts,
     featureFlags, affiliateData, loadingData, initialLoadCompleted, wallets, contratos, setDataState,
@@ -103,11 +104,23 @@ export const DataProvider = ({ children }) => {
     if (!wallet) return 0;
     
     const transactionsForWallet = (financialData?.transactions || [])
-      .filter(t => t.wallet_id === walletId && (t.status === 'PAGO' || (t.status === 'AGUARDANDO_LIBERACAO' && new Date(t.release_date) <= new Date())));
+      .filter(t => {
+        if (t.wallet_id !== walletId) return false;
+        if (t.status === 'PAGO') return true;
+        if (t.status === 'AGUARDANDO_LIBERACAO' && t.release_date) {
+          try {
+            return new Date(t.release_date) <= new Date();
+          } catch {
+            return false;
+          }
+        }
+        return false;
+      });
       
     const balance = transactionsForWallet.reduce((sum, t) => {
-      if (t.tipo === 'ENTRADA') return sum + Number(t.valor);
-      if (t.tipo === 'SAIDA') return sum - Number(t.valor);
+      const valor = Number(t.valor) || 0;
+      if (t.tipo === 'ENTRADA') return sum + valor;
+      if (t.tipo === 'SAIDA') return sum - valor;
       return sum;
     }, Number(wallet.initial_balance) || 0);
 
@@ -318,6 +331,12 @@ export const DataProvider = ({ children }) => {
   const updateServicePackage = async (id, updates) => { if (!user || !isUserActive()) { throw new Error("Operação não permitida"); } try { const data = await updateServicePackageDb(supabase, user.id, id, updates); setDataState(prev => ({...prev, servicePackages: prev.servicePackages.map(p => (p.id === id ? data : p)).sort((a,b) => new Date(b.created_at) - new Date(a.created_at))})); return data; } catch (error) { handleError(error, 'atualizar pacote'); throw error; } };
   const deleteServicePackage = async (id) => { if (!user || !isUserActive()) return; try { await deleteServicePackageDb(supabase, user.id, id); setDataState(prev => ({...prev, servicePackages: prev.servicePackages.filter(p => p.id !== id)})); } catch (error) { handleError(error, 'remover pacote'); } };
   const getServicePackageById = (id) => servicePackages.find(pkg => pkg.id === id);
+  
+  // Products functions
+  const addProduct = async (product) => { if (!user || !isUserActive()) { throw new Error("Operação não permitida"); } try { const data = await addProductDb(supabase, user.id, product); setDataState(prev => ({...prev, products: [data, ...prev.products].sort((a,b) => new Date(b.created_at) - new Date(a.created_at))})); return data; } catch (error) { handleError(error, 'adicionar produto'); throw error; } };
+  const updateProduct = async (id, updates) => { if (!user || !isUserActive()) { throw new Error("Operação não permitida"); } try { const data = await updateProductDb(supabase, user.id, id, updates); setDataState(prev => ({...prev, products: prev.products.map(p => (p.id === id ? data : p)).sort((a,b) => new Date(b.created_at) - new Date(a.created_at))})); return data; } catch (error) { handleError(error, 'atualizar produto'); throw error; } };
+  const deleteProduct = async (id) => { if (!user || !isUserActive()) return; try { await deleteProductDb(supabase, user.id, id); setDataState(prev => ({...prev, products: prev.products.filter(p => p.id !== id)})); } catch (error) { handleError(error, 'remover produto'); } };
+  const getProductById = (id) => products.find(product => product.id === id);
   const getTransactionById = (id) => financialData.transactions.find(transaction => transaction.id === id);
   const getWorkflowCardById = (id) => workflowCards.find(card => card.id === id);
   const importGoogleEventsAsWorkflowCards = async (googleEvents) => {
@@ -365,7 +384,7 @@ export const DataProvider = ({ children }) => {
   const updateOrcamento = async (id, data) => { if (!user || !isUserActive()) throw new Error("Operação não permitida"); try { const res = await updateOrcamentoDb(supabase, id, data, user.id); setDataState(p=>({...p, clientOrcamentos:p.clientOrcamentos.map(o=>o.id===id?res:o).sort((a,b)=>new Date(b.data_envio)-new Date(a.data_envio))})); return res; } catch(e){handleError(e, 'update orçamento'); throw e;}};
   const deleteOrcamento = async (id) => { if (!user || !isUserActive()) throw new Error("Operação não permitida"); try { await deleteOrcamentoDb(supabase, id, user.id); setDataState(p=>({...p, clientOrcamentos:p.clientOrcamentos.filter(o=>o.id!==id)})); } catch(e){handleError(e, 'delete orçamento'); throw e;}};
 
-  const value = { clients, suppliers, workflowCards, financialData, settings, loading: loadingData || loadingAuth, servicePackages, user, session, loadingAuth, refreshData, planStatus, trialDaysRemaining, isUserActive, equipments, maintenances, fixedCosts, pricedServices, savingGoals, pendingReserveAllocations, upcomingReminders, clientContracts, clientOrcamentos, availabilitySlots, proposals, blogPosts, featureFlags, isFeatureEnabled, affiliateData, wallets, contratos, getWalletBalance, logout, addClient, updateClient, deleteClient, getClientById, addSupplier, updateSupplier, deleteSupplier, getSupplierById, addWorkflowCard, updateWorkflowCard, deleteWorkflowCard, addComment, getStatusLabel, importGoogleEventsAsWorkflowCards, getWorkflowCardById, addTransaction, updateTransaction, deleteTransaction, getTransactionById, setSettings, addServicePackage, updateServicePackage, deleteServicePackage, getServicePackageById, addEquipment, updateEquipment, deleteEquipment, addMaintenance, getEquipmentMaintenances, addFixedCost, updateFixedCost, deleteFixedCost, addPricedService, addSavingGoal, updateSavingGoal, deleteSavingGoal, updateSavingGoalBalance, allocateToSavingGoal, dismissPendingAllocation, refreshClientContracts, addClientContract, deleteClientContract, refreshClientOrcamentos, addOrcamento, updateOrcamento, deleteOrcamento, deleteAllUserData, deleteUserAccount, deleteProposal, handleNewSubscription, addWallet, updateWallet, deleteWallet, initialCardConfigMemo };
+  const value = { clients, suppliers, workflowCards, financialData, settings, loading: loadingData || loadingAuth, servicePackages, products, user, session, loadingAuth, refreshData, planStatus, trialDaysRemaining, isUserActive, equipments, maintenances, fixedCosts, pricedServices, savingGoals, pendingReserveAllocations, upcomingReminders, clientContracts, clientOrcamentos, availabilitySlots, proposals, blogPosts, featureFlags, isFeatureEnabled, affiliateData, wallets, contratos, getWalletBalance, logout, addClient, updateClient, deleteClient, getClientById, addSupplier, updateSupplier, deleteSupplier, getSupplierById, addWorkflowCard, updateWorkflowCard, deleteWorkflowCard, addComment, getStatusLabel, importGoogleEventsAsWorkflowCards, getWorkflowCardById, addTransaction, updateTransaction, deleteTransaction, getTransactionById, setSettings, addServicePackage, updateServicePackage, deleteServicePackage, getServicePackageById, addProduct, updateProduct, deleteProduct, getProductById, addEquipment, updateEquipment, deleteEquipment, addMaintenance, getEquipmentMaintenances, addFixedCost, updateFixedCost, deleteFixedCost, addPricedService, addSavingGoal, updateSavingGoal, deleteSavingGoal, updateSavingGoalBalance, allocateToSavingGoal, dismissPendingAllocation, refreshClientContracts, addClientContract, deleteClientContract, refreshClientOrcamentos, addOrcamento, updateOrcamento, deleteOrcamento, deleteAllUserData, deleteUserAccount, deleteProposal, handleNewSubscription, addWallet, updateWallet, deleteWallet, initialCardConfigMemo };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };

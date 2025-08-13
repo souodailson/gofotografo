@@ -1,7 +1,7 @@
 import React from 'react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Filter, Search, X, Tag } from 'lucide-react';
+import OptimizedInput from '@/components/common/OptimizedInput';
 import {
   Select,
   SelectContent,
@@ -54,12 +54,12 @@ const WorkflowFilters = ({ activeFilters, setActiveFilters, searchTerm, setSearc
           <label htmlFor="search" className="block text-sm font-medium text-muted-foreground mb-1">Busca Rápida</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
+            <OptimizedInput
               id="search"
               type="text"
               placeholder="Nome, data, pacote..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onDebouncedChange={setSearchTerm}
               className="pl-10 bg-background"
             />
           </div>

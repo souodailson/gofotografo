@@ -308,11 +308,14 @@ const MySetup = () => {
   return (
     <div className="container mx-auto p-4 md:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 sm:mb-0">
-          <span className="bg-gradient-to-r from-customPurple to-customGreen bg-clip-text text-transparent">
+        <div className={isMobile ? "hidden" : ""}>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 sm:mb-0 titulo-gradiente">
             Meu Setup
-          </span>
-        </h1>
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Gerencie seus equipamentos fotográficos e acompanhe o valor do seu setup
+          </p>
+        </div>
         <Button onClick={handleAddNewEquipment} className="btn-custom-gradient shadow-lg hover:opacity-90 transition-opacity">
           <PlusCircle className="w-5 h-5 mr-2" />
           Novo Equipamento
