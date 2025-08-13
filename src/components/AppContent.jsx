@@ -255,14 +255,14 @@ const AppContent = ({ children }) => {
 
                       <Route path="/availability-manager" element={<FeatureGuard featureName="agenda_pro"><AvailabilityManagerPage isMobile={isMobile} /></FeatureGuard>} />
                       <Route path="/referrals" element={<ReferralsPage />} />
-                      <Route path="/gomov" element={<GoMovPage />} />
-                      <Route path="/inspira" element={<InspiraPage />} />
-                      <Route path="/season" element={<SeasonPage />} />
-                      <Route path="/respostas-rapidas" element={<RespostasRapidasPage />} />
-                      <Route path="/spot" element={<SpotPage />} />
-                      <Route path="/rival" element={<RivalPage />} />
-                      <Route path="/metas" element={<MetasPage />} />
-                      <Route path="/opportune" element={<OpportunePage />} />
+                      <Route path="/gomov" element={<FeatureGuard featureName="gomov"><GoMovPage /></FeatureGuard>} />
+                      <Route path="/inspira" element={<FeatureGuard featureName="inspira"><InspiraPage /></FeatureGuard>} />
+                      <Route path="/season" element={<FeatureGuard featureName="season"><SeasonPage /></FeatureGuard>} />
+                      <Route path="/respostas-rapidas" element={<FeatureGuard featureName="respostas"><RespostasRapidasPage /></FeatureGuard>} />
+                      <Route path="/spot" element={<FeatureGuard featureName="spot"><SpotPage /></FeatureGuard>} />
+                      <Route path="/rival" element={<FeatureGuard featureName="rival"><RivalPage /></FeatureGuard>} />
+                      <Route path="/metas" element={<FeatureGuard featureName="metas"><MetasPage /></FeatureGuard>} />
+                      <Route path="/opportune" element={<FeatureGuard featureName="opportune"><OpportunePage /></FeatureGuard>} />
                       <Route path="/control-access" element={<DataManagementPage />} />
                       <Route path="/find" element={<FindPage />} />
                       

@@ -203,15 +203,15 @@ const RivalPage = () => {
   const myPosition = getMyMarketPosition();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20">
+    <div className="min-h-screen bg-background">
       <div className="space-y-6 p-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent flex items-center justify-center gap-3">
-            <Target className="w-8 h-8 text-orange-600" />
+          <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-3">
+            <Target className="w-8 h-8 text-foreground" />
             RIVAL - Radar de Concorrência e Mercado
           </h1>
           <p className="text-muted-foreground mt-2">

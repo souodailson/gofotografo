@@ -34,25 +34,25 @@ const WorkflowHeader = ({
             <Button
               variant="outline"
               onClick={() => navigate('/respostas-rapidas')}
-              className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200 hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 dark:from-green-900/20 dark:to-blue-900/20 dark:border-green-700 h-9"
+              className="bg-transparent border-[#dbddd5] text-muted-foreground hover:bg-gradient-to-r hover:from-green-100 hover:to-blue-100 hover:border-green-200 hover:text-green-600 dark:border-[#dbddd5] dark:hover:from-green-900/20 dark:hover:to-blue-900/20 dark:hover:border-green-700 h-9 transition-all duration-300"
             >
-              <MessageSquare className="w-4 h-4 mr-2 text-green-600" />
+              <MessageSquare className="w-4 h-4 mr-2 text-current" />
               RESPOSTAS
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate('/spot')}
-              className="bg-gradient-to-r from-red-50 to-pink-50 border-red-200 hover:bg-gradient-to-r hover:from-red-100 hover:to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 dark:border-red-700 h-9"
+              className="bg-transparent border-[#dbddd5] text-muted-foreground hover:bg-gradient-to-r hover:from-red-100 hover:to-pink-100 hover:border-red-200 hover:text-red-600 dark:border-[#dbddd5] dark:hover:from-red-900/20 dark:hover:to-pink-900/20 dark:hover:border-red-700 h-9 transition-all duration-300"
             >
-              <MapPin className="w-4 h-4 mr-2 text-red-600" />
+              <MapPin className="w-4 h-4 mr-2 text-current" />
               SPOT
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate('/gomov')}
-              className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-700 h-9"
+              className="bg-transparent border-[#dbddd5] text-muted-foreground hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 hover:border-blue-200 hover:text-blue-600 dark:border-[#dbddd5] dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 dark:hover:border-blue-700 h-9 transition-all duration-300"
             >
-              <Route className="w-4 h-4 mr-2 text-blue-600" />
+              <Route className="w-4 h-4 mr-2 text-current" />
               GO.MOV
             </Button>
             <Button

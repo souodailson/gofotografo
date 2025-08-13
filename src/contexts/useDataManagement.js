@@ -89,6 +89,7 @@ export const useDataManagement = (user, settings, toast) => {
       contratos: () => supabase.from('contratosgerados').select('*').eq('id_fotografo', user.id).order('data_geracao', { ascending: false }),
       wallets: () => supabase.from('wallets').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       feature_flags: () => supabase.from('feature_flags').select('*'),
+      system_features: () => supabase.from('system_features').select('*'),
       referrals: () => supabase.from('referrals').select('*').eq('referrer_id', user.id),
       commissions: () => supabase.from('commissions').select('*').eq('referrer_id', user.id),
     };
@@ -141,7 +142,18 @@ export const useDataManagement = (user, settings, toast) => {
           case 'propostas': newStateUpdates.proposals = res.data; break;
           case 'contratos': newStateUpdates.contratos = res.data; break;
           case 'wallets': newStateUpdates.wallets = res.data; break;
-          case 'feature_flags': newStateUpdates.featureFlags = res.data.reduce((acc, flag) => ({ ...acc, [flag.nome_funcionalidade]: flag.esta_ativa }), {}); break;
+          case 'feature_flags': 
+            newStateUpdates.featureFlags = { 
+              ...(newStateUpdates.featureFlags || {}), 
+              ...res.data.reduce((acc, flag) => ({ ...acc, [flag.nome_funcionalidade]: flag.esta_ativa }), {}) 
+            }; 
+            break;
+          case 'system_features': 
+            newStateUpdates.featureFlags = { 
+              ...(newStateUpdates.featureFlags || {}), 
+              ...res.data.reduce((acc, flag) => ({ ...acc, [flag.feature_key]: flag.is_enabled }), {}) 
+            }; 
+            break;
           case 'referrals': newStateUpdates.affiliateData = { ...state.affiliateData, referrals: res.data }; break;
           case 'commissions': newStateUpdates.affiliateData = { ...state.affiliateData, commissions: res.data }; break;
         }
@@ -181,7 +193,7 @@ export const useDataManagement = (user, settings, toast) => {
         clientsRes, suppliersRes, workflowCardsRes, transactionsRes, servicePackagesRes, productsRes,
         equipmentsRes, maintenancesRes, fixedCostsRes, pricedServicesRes,
         savingGoalsRes, availabilitySlotsRes, proposalsRes, contratosRes, walletsRes,
-        featureFlagsRes, referralsRes, commissionsRes
+        featureFlagsRes, systemFeaturesRes, referralsRes, commissionsRes
       ] = await Promise.all([
         safeQuery(supabase.from('clients').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'clients'),
         safeQuery(supabase.from('suppliers').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'suppliers'),
@@ -199,6 +211,7 @@ export const useDataManagement = (user, settings, toast) => {
         safeQuery(supabase.from('contratosgerados').select('*').eq('id_fotografo', currentUser.id).order('data_geracao', { ascending: false }), 'contratos'),
         safeQuery(supabase.from('wallets').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }), 'wallets'),
         safeQuery(supabase.from('feature_flags').select('*'), 'feature_flags'),
+        safeQuery(supabase.from('system_features').select('*'), 'system_features'),
         safeQuery(supabase.from('referrals').select('*').eq('referrer_id', currentUser.id), 'referrals'),
         safeQuery(supabase.from('commissions').select('*').eq('referrer_id', currentUser.id), 'commissions'),
       ]);
@@ -208,7 +221,7 @@ export const useDataManagement = (user, settings, toast) => {
         clientsRes.error, suppliersRes.error, workflowCardsRes.error, transactionsRes.error, servicePackagesRes.error,
         equipmentsRes.error, maintenancesRes.error, fixedCostsRes.error, pricedServicesRes.error,
         savingGoalsRes.error, availabilitySlotsRes.error, proposalsRes.error, contratosRes.error, walletsRes.error,
-        featureFlagsRes.error, referralsRes.error, commissionsRes.error
+        featureFlagsRes.error, systemFeaturesRes.error, referralsRes.error, commissionsRes.error
       ].filter(error => error && error.code !== '42P01' && !error.message?.includes('does not exist'));
 
       if (criticalErrors.length > 0) {
@@ -238,7 +251,12 @@ export const useDataManagement = (user, settings, toast) => {
         proposals: proposalsRes.data,
         contratos: contratosRes.data,
         wallets: walletsRes.data,
-        featureFlags: featureFlagsRes.data.reduce((acc, flag) => ({ ...acc, [flag.nome_funcionalidade]: flag.esta_ativa }), {}),
+        featureFlags: {
+          // Feature flags da tabela original
+          ...featureFlagsRes.data.reduce((acc, flag) => ({ ...acc, [flag.nome_funcionalidade]: flag.esta_ativa }), {}),
+          // System features da nova tabela
+          ...systemFeaturesRes.data.reduce((acc, flag) => ({ ...acc, [flag.feature_key]: flag.is_enabled }), {})
+        },
         affiliateData: { referrals: referralsRes.data, commissions: commissionsRes.data },
         loadingData: false,
         initialLoadCompleted: true,

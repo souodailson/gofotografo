@@ -1,0 +1,1 @@
+import{b7 as c,ao as f,b3 as u}from"./index-DHBNVHsv.js";function d(s,e){const a=c(),n=e?.weekStartsOn??e?.locale?.options?.weekStartsOn??a.weekStartsOn??a.locale?.options?.weekStartsOn??0,t=f(s),o=t.getDay(),r=(o<n?-7:0)+6-(o-n);return t.setDate(t.getDate()+r),t.setHours(23,59,59,999),t}function i(s,e){return u(s,-e)}export{d as e,i as s};

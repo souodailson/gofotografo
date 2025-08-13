@@ -50,6 +50,7 @@ const SpotPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todos');
   const [selectedRegion, setSelectedRegion] = useState('todas');
+  const [selectedType, setSelectedType] = useState('locais');
   const [spots, setSpots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -301,15 +302,15 @@ const SpotPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20">
+    <div className="min-h-screen bg-background">
       <div className="space-y-6 p-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent flex items-center justify-center gap-3">
-            <MapPin className="w-8 h-8 text-red-600" />
+          <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-3">
+            <MapPin className="w-8 h-8 text-foreground" />
             SPOT - Mapa de Fornecedores e Locais
           </h1>
           <p className="text-muted-foreground mt-2">

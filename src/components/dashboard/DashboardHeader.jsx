@@ -55,17 +55,17 @@ const DashboardHeader = ({
             <Button
               variant="outline"
               onClick={() => navigate('/rival')}
-              className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 hover:bg-gradient-to-r hover:from-orange-100 hover:to-red-100 dark:from-orange-900/20 dark:to-red-900/20 dark:border-orange-700"
+              className="bg-transparent border-[#dbddd5] text-muted-foreground hover:bg-gradient-to-r hover:from-orange-100 hover:to-red-100 hover:border-orange-200 hover:text-orange-600 dark:border-[#dbddd5] dark:hover:from-orange-900/20 dark:hover:to-red-900/20 dark:hover:border-orange-700 transition-all duration-300"
             >
-              <Target className="w-4 h-4 mr-2 text-orange-600" />
+              <Target className="w-4 h-4 mr-2 text-current" />
               RIVAL
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate('/metas')}
-              className="bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200 hover:bg-gradient-to-r hover:from-yellow-100 hover:to-amber-100 dark:from-yellow-900/20 dark:to-amber-900/20 dark:border-yellow-700"
+              className="bg-transparent border-[#dbddd5] text-muted-foreground hover:bg-gradient-to-r hover:from-yellow-100 hover:to-amber-100 hover:border-yellow-200 hover:text-yellow-600 dark:border-[#dbddd5] dark:hover:from-yellow-900/20 dark:hover:to-amber-900/20 dark:hover:border-yellow-700 transition-all duration-300"
             >
-              <Trophy className="w-4 h-4 mr-2 text-yellow-600" />
+              <Trophy className="w-4 h-4 mr-2 text-current" />
               METAS
             </Button>
             <TooltipProvider>

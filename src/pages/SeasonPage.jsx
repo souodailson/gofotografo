@@ -331,15 +331,15 @@ ${customCampaign ? `\n\n${customCampaign}` : ''}`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20">
+    <div className="min-h-screen bg-background">
       <div className="space-y-6 p-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent flex items-center justify-center gap-3">
-            <CalendarIcon className="w-8 h-8 text-yellow-600" />
+          <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-3">
+            <CalendarIcon className="w-8 h-8 text-foreground" />
             SEASON - Planejador Sazonal
           </h1>
           <p className="text-muted-foreground mt-2">

@@ -314,15 +314,15 @@ Swipe para ver mais dessa sessão maravilhosa! ➡️
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20">
+    <div className="min-h-screen bg-background">
       <div className="space-y-6 p-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent flex items-center justify-center gap-3">
-            <MessageSquare className="w-8 h-8 text-green-600" />
+          <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-3">
+            <MessageSquare className="w-8 h-8 text-foreground" />
             RESPOSTAS RÁPIDAS - Kit de Atendimento
           </h1>
           <p className="text-muted-foreground mt-2">

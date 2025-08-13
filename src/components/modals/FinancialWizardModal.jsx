@@ -299,8 +299,8 @@ const FinancialWizardModal = ({ isOpen, onClose, type, transactionData, onSaveSu
                 onClick={() => setTransactionType(TRANSACTION_TYPES.SIMPLE)}
                 className={`p-4 border-2 rounded-lg text-left transition-colors ${
                   transactionType === TRANSACTION_TYPES.SIMPLE 
-                    ? 'border-primary bg-primary/10' 
-                    : 'border-border hover:border-primary/50'
+                    ? 'border-blue-500 bg-blue-500/10' 
+                    : 'border-border hover:border-blue-500/50'
                 }`}
               >
                 <DollarSign className="w-6 h-6 mb-2 text-primary" />
@@ -312,8 +312,8 @@ const FinancialWizardModal = ({ isOpen, onClose, type, transactionData, onSaveSu
                 onClick={() => setTransactionType(TRANSACTION_TYPES.PRODUCTS)}
                 className={`p-4 border-2 rounded-lg text-left transition-colors ${
                   transactionType === TRANSACTION_TYPES.PRODUCTS 
-                    ? 'border-primary bg-primary/10' 
-                    : 'border-border hover:border-primary/50'
+                    ? 'border-blue-500 bg-blue-500/10' 
+                    : 'border-border hover:border-blue-500/50'
                 }`}
               >
                 <ShoppingCart className="w-6 h-6 mb-2 text-blue-500" />
@@ -325,8 +325,8 @@ const FinancialWizardModal = ({ isOpen, onClose, type, transactionData, onSaveSu
                 onClick={() => setTransactionType(TRANSACTION_TYPES.SERVICES)}
                 className={`p-4 border-2 rounded-lg text-left transition-colors ${
                   transactionType === TRANSACTION_TYPES.SERVICES 
-                    ? 'border-primary bg-primary/10' 
-                    : 'border-border hover:border-primary/50'
+                    ? 'border-blue-500 bg-blue-500/10' 
+                    : 'border-border hover:border-blue-500/50'
                 }`}
               >
                 <Package className="w-6 h-6 mb-2 text-green-500" />
@@ -338,8 +338,8 @@ const FinancialWizardModal = ({ isOpen, onClose, type, transactionData, onSaveSu
                 onClick={() => setTransactionType(TRANSACTION_TYPES.MIXED)}
                 className={`p-4 border-2 rounded-lg text-left transition-colors ${
                   transactionType === TRANSACTION_TYPES.MIXED 
-                    ? 'border-primary bg-primary/10' 
-                    : 'border-border hover:border-primary/50'
+                    ? 'border-blue-500 bg-blue-500/10' 
+                    : 'border-border hover:border-blue-500/50'
                 }`}
               >
                 <div className="flex items-center mb-2">

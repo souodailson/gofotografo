@@ -338,17 +338,17 @@ const CalendarComponent = ({ isMobile: propIsMobile, setActiveTab }) => {
             <Button 
               variant="outline"
               onClick={() => window.open('/season', '_blank')}
-              className="w-full sm:w-auto bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 hover:bg-gradient-to-r hover:from-yellow-100 hover:to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 dark:border-yellow-700"
+              className="w-full sm:w-auto bg-transparent border-[#dbddd5] text-muted-foreground hover:bg-gradient-to-r hover:from-yellow-100 hover:to-orange-100 hover:border-yellow-200 hover:text-yellow-600 dark:border-[#dbddd5] dark:hover:from-yellow-900/20 dark:hover:to-orange-900/20 dark:hover:border-yellow-700 transition-all duration-300"
             >
-              <CalendarDays className="w-4 h-4 mr-2 text-yellow-600" />
+              <CalendarDays className="w-4 h-4 mr-2 text-current" />
               SEASON
             </Button>
             <Button 
               variant="outline"
               onClick={() => window.open('/opportune', '_blank')}
-              className="w-full sm:w-auto bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 dark:border-purple-700"
+              className="w-full sm:w-auto bg-transparent border-[#dbddd5] text-muted-foreground hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 hover:border-purple-200 hover:text-purple-600 dark:border-[#dbddd5] dark:hover:from-purple-900/20 dark:hover:to-blue-900/20 dark:hover:border-purple-700 transition-all duration-300"
             >
-              <Compass className="w-4 h-4 mr-2 text-purple-600" />
+              <Compass className="w-4 h-4 mr-2 text-current" />
               OPPORTUNE
             </Button>
             <GoogleAuthControls

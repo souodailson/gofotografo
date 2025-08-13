@@ -184,6 +184,7 @@ const Sidebar = ({ activeTab, setActiveTab, collapsed, setCollapsed }) => {
         </div>
       )}
 
+
       <div className="mb-2">
         <NavItem
           icon={Gift}
