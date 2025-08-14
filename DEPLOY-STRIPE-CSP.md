@@ -1,15 +1,18 @@
 # 🚀 INSTRUÇÕES PARA CORRIGIR STRIPE - CSP
 
 ## ❌ **PROBLEMA IDENTIFICADO**
-O Content Security Policy (CSP) estava bloqueando o carregamento do Stripe.js, impedindo que os pagamentos funcionem.
+O Content Security Policy (CSP) estava bloqueando:
+1. Carregamento do Stripe.js 
+2. Iframes necessários para o funcionamento do Stripe
 
 ## ✅ **SOLUÇÃO APLICADA**
-Atualizei o arquivo `vercel.json` para incluir os domínios do Stripe no CSP:
+Atualizei o arquivo `vercel.json` para incluir TODOS os domínios necessários do Stripe:
 
 ### Domínios Stripe adicionados:
-- `https://js.stripe.com` (script-src)
-- `https://api.stripe.com` (connect-src)  
-- `https://checkout.stripe.com` (connect-src + form-action)
+- `https://js.stripe.com` (script-src + frame-src)
+- `https://hooks.stripe.com` (frame-src)
+- `https://checkout.stripe.com` (frame-src + connect-src + form-action)
+- `https://api.stripe.com` (connect-src)
 
 ## 🔧 **PARA APLICAR A CORREÇÃO**
 
@@ -32,19 +35,24 @@ git push origin main
 
 ## 📋 **ALTERAÇÕES FEITAS**
 
-### Antes:
+### Principais adições ao CSP:
+
+**frame-src adicionado:**
 ```
-script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com
+frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com
 ```
 
-### Depois:
+**script-src atualizado:**
 ```
-script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://js.stripe.com
+script-src 'self' 'unsafe-inline' 'unsafe-eval' [...] https://js.stripe.com
 ```
 
-### Também adicionado:
+**connect-src e form-action atualizados:**
 - `form-action 'self' https://checkout.stripe.com`
 - `connect-src` includes `https://api.stripe.com https://checkout.stripe.com`
+
+### ⚠️ **CRÍTICO**: 
+O `frame-src` era o que estava faltando! O Stripe usa iframes internos para segurança.
 
 ## ⚠️ **IMPORTANTE**
 Após o deploy, teste imediatamente:
