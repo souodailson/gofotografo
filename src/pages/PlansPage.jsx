@@ -5,11 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { useData } from '@/contexts/DataContext';
-import { supabase } from '@/lib/supabaseClient';
-import { loadStripe } from '@stripe/stripe-js';
-
-const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Ra7fNDORq3T75OLVpM1IkXngTngB7FSAeOIVU1UAS48EPUqAPMLvxOMoyMBw5P8y9F4MyV8K1VhCRI0lXepLnZD00caLRy39Q';
-const stripePromise = STRIPE_PUBLISHABLE_KEY ? loadStripe(STRIPE_PUBLISHABLE_KEY) : null;
 
 const PlansPage = ({ setActiveTab }) => {
   const { toast } = useToast();
@@ -18,15 +13,6 @@ const PlansPage = ({ setActiveTab }) => {
   const [selectedPlan, setSelectedPlan] = useState(null);
 
   useEffect(() => {
-    if (!stripePromise && !STRIPE_PUBLISHABLE_KEY) {
-      toast({
-        title: "Configuração do Stripe Pendente",
-        description: "A chave publicável do Stripe ainda não foi configurada. Pagamentos não podem ser processados.",
-        variant: "destructive",
-        duration: 10000,
-      });
-    }
-    
     const query = new URLSearchParams(window.location.search);
     if (query.get("status") === "success" && query.get("session_id")) {
       toast({
@@ -52,14 +38,13 @@ const PlansPage = ({ setActiveTab }) => {
   }, [toast, refreshData]);
 
   const handleChoosePlan = async (planType, priceId) => {
-    if (!STRIPE_PUBLISHABLE_KEY || !priceId) {
+    if (!priceId) {
       toast({
-        title: "Integração com Pagamento Incompleta",
-        description: "A configuração de pagamento para este plano ainda não foi finalizada.",
+        title: "Erro de Configuração",
+        description: "ID do preço não configurado.",
         variant: "destructive",
         duration: 7000,
       });
-      console.error("Stripe Publishable Key or Price ID is missing.");
       return;
     }
 
@@ -70,32 +55,40 @@ const PlansPage = ({ setActiveTab }) => {
 
     setLoadingStripe(true);
     setSelectedPlan(planType);
-    const stripe = await stripePromise;
-    if (!stripe) {
-        toast({ title: "Erro no Stripe", description: "Não foi possível carregar o Stripe.", variant: "destructive"});
-        setLoadingStripe(false);
-        setSelectedPlan(null);
-        return;
-    }
 
     try {
-      const { error } = await stripe.redirectToCheckout({
-        lineItems: [{ price: priceId, quantity: 1 }],
-        mode: 'subscription',
-        successUrl: `${window.location.origin}${window.location.pathname}?session_id={CHECKOUT_SESSION_ID}&plan_type=${planType}&status=success`,
-        cancelUrl: `${window.location.origin}${window.location.pathname}?plan_type=${planType}&status=cancelled`,
-        customerEmail: user.email,
-        clientReferenceId: user.id, 
+      // Criar sessão de checkout via API do backend
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          priceId: priceId,
+          userId: user.id,
+          userEmail: user.email,
+          planType: planType,
+          successUrl: `${window.location.origin}/plans?session_id={CHECKOUT_SESSION_ID}&plan_type=${planType}&status=success`,
+          cancelUrl: `${window.location.origin}/plans?plan_type=${planType}&status=cancelled`
+        }),
       });
 
-      if (error) {
-        console.error("Stripe Checkout error:", error);
-        toast({ title: "Erro no Checkout", description: error.message, variant: "destructive" });
+      if (!response.ok) {
+        throw new Error('Erro ao criar sessão de checkout');
       }
+
+      const { url } = await response.json();
+      
+      // Redirecionar diretamente para o Stripe
+      window.location.href = url;
+
     } catch (error) {
-      console.error("Error redirecting to Stripe Checkout:", error);
-      toast({ title: "Erro Inesperado", description: "Ocorreu um problema ao tentar iniciar o pagamento.", variant: "destructive" });
-    } finally {
+      console.error("Error creating checkout session:", error);
+      toast({ 
+        title: "Erro no Pagamento", 
+        description: "Não foi possível iniciar o processo de pagamento. Tente novamente.", 
+        variant: "destructive" 
+      });
       setLoadingStripe(false);
       setSelectedPlan(null);
     }
