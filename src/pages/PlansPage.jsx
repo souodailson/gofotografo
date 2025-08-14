@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Gem, Zap, ShieldCheck, Star, Percent, Gift } from 'lucide-react';
+import { CheckCircle, Gem, Zap, ShieldCheck, Star, Crown, MessageCircle, Timer, Sparkles, TrendingUp, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
@@ -8,94 +8,14 @@ import { useData } from '@/contexts/DataContext';
 import { supabase } from '@/lib/supabaseClient';
 import { loadStripe } from '@stripe/stripe-js';
 
-const plansData = [
-  {
-    id: 'starter',
-    name: 'PLANO STARTER',
-    tagline: 'O impulso que você precisa para decolar.',
-    description: 'Ideal para fotógrafos que estão começando e querem transformar o talento em um negócio organizado desde o primeiro dia.',
-    priceMonthly: '19,90',
-    priceYearlyOriginal: '199,00', 
-    priceYearlyDiscounted: '199,00', 
-    yearlySavings: 'Pague por 10 meses e use por 12. São 2 meses de presente!',
-    stripePriceIdMonthly: 'price_1Ra8ilDORq3T75OLnBy3ZCJb', 
-    stripePriceIdYearly: 'price_1Ra8ilDORq3T75OLPRPssWYq', 
-    features: [
-      'Agenda de Clientes Ilimitada',
-      'Gestão de Oportunidades (Funil de Vendas)',
-      'Controle de Caixa Simplificado',
-      'Suporte dedicado via e-mail',
-      'Teste grátis por 7 dias, sem pedir seu cartão',
-    ],
-    tier: 1,
-    promoActive: false,
-    exclusiveBonuses: []
-  },
-  {
-    id: 'professional',
-    name: 'PLANO PROFISSIONAL',
-    tagline: 'Perfeito para otimizar o fluxo de trabalho.',
-    description: 'Para fotógrafos que buscam economizar horas preciosas com automações e apresentar uma imagem mais profissional.',
-    priceMonthly: '39,90',
-    priceYearlyOriginal: '479,88', 
-    priceYearlyDiscounted: '239,94', 
-    yearlySavings: 'Economize mais de 50% e tenha suporte prioritário.',
-    stripePriceIdMonthly: 'price_1Ra8igDORq3T75OLQuCI0dDO', 
-    stripePriceIdYearly: 'price_1RanKjDORq3T75OL58V0uwpl', 
-    recommended: true,
-    features: [
-      'Tudo do plano Starter, e mais:',
-      'Controle Financeiro Avançado',
-      'Agenda Inteligente com Google Calendar',
-      'Automações e Lembretes',
-      'Faça o upload da sua logomarca',
-      'Subdomínio exclusivo (ex: seuestudio.dominio.com)',
-      'Anotações Rápidas nos cards',
-      'Precifique - sistema inteligente para criar pacotes, serviços e produtos',
-      'Reserva Inteligente - Crie reservas inteligentes e tenha mais dinheiro',
-      'Suporte prioritário via e-mail e chat',
-    ],
-    tier: 2,
-    promoActive: true,
-    exclusiveBonuses: []
-  },
-  {
-    id: 'studio_pro',
-    name: 'PLANO STUDIO PRO',
-    tagline: 'A plataforma definitiva para escalar seu negócio.',
-    description: 'Para estúdios e fotógrafos de alto volume que precisam de ferramentas robustas para gerenciar equipes e encantar clientes.',
-    priceMonthly: '99,90',
-    priceYearlyOriginal: '1198,80', 
-    priceYearlyDiscounted: '599,40', 
-    yearlySavings: 'A melhor oferta para o seu estúdio, com 50% de desconto e atendimento prioritario.',
-    stripePriceIdMonthly: 'price_1Ra8iYDORq3T75OLCDN9fPpj', 
-    stripePriceIdYearly: 'price_1RanLoDORq3T75OLacBvLO9R', 
-    features: [
-      'Tudo do plano Profissional, e mais:',
-      'Dashboard Financeiro Completo',
-      'Análise de Desempenho (Analytics)',
-      'Gestão de Equipe e Colaboradores',
-      'Precifique - sistema inteligente para criar pacotes, serviços e produtos',
-      'Reserva Inteligente - Crie reservas inteligentes e tenha mais dinheiro',
-      'Suporte Premium 7 dias por semana',
-    ],
-    tier: 3,
-    promoActive: true,
-    exclusiveBonuses: [
-      'Scripts de atendimento persuasivos',
-      '+10 Contratos blindados para vários nichos'
-    ]
-  },
-];
-
 const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Ra7fNDORq3T75OLVpM1IkXngTngB7FSAeOIVU1UAS48EPUqAPMLvxOMoyMBw5P8y9F4MyV8K1VhCRI0lXepLnZD00caLRy39Q';
 const stripePromise = STRIPE_PUBLISHABLE_KEY ? loadStripe(STRIPE_PUBLISHABLE_KEY) : null;
 
 const PlansPage = ({ setActiveTab }) => {
-  const [billingCycle, setBillingCycle] = useState('monthly'); 
   const { toast } = useToast();
   const { settings, user, refreshData, planStatus: contextPlanStatus } = useData();
   const [loadingStripe, setLoadingStripe] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   useEffect(() => {
     if (!stripePromise && !STRIPE_PUBLISHABLE_KEY) {
@@ -129,10 +49,9 @@ const PlansPage = ({ setActiveTab }) => {
       const newUrl = window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
     }
-
   }, [toast, refreshData]);
 
-  const handleChoosePlan = async (planId, priceId) => {
+  const handleChoosePlan = async (planType, priceId) => {
     if (!STRIPE_PUBLISHABLE_KEY || !priceId) {
       toast({
         title: "Integração com Pagamento Incompleta",
@@ -150,10 +69,12 @@ const PlansPage = ({ setActiveTab }) => {
     }
 
     setLoadingStripe(true);
+    setSelectedPlan(planType);
     const stripe = await stripePromise;
     if (!stripe) {
         toast({ title: "Erro no Stripe", description: "Não foi possível carregar o Stripe.", variant: "destructive"});
         setLoadingStripe(false);
+        setSelectedPlan(null);
         return;
     }
 
@@ -161,8 +82,8 @@ const PlansPage = ({ setActiveTab }) => {
       const { error } = await stripe.redirectToCheckout({
         lineItems: [{ price: priceId, quantity: 1 }],
         mode: 'subscription',
-        successUrl: `${window.location.origin}${window.location.pathname}?session_id={CHECKOUT_SESSION_ID}&plan_id=${planId}&status=success`,
-        cancelUrl: `${window.location.origin}${window.location.pathname}?plan_id=${planId}&status=cancelled`,
+        successUrl: `${window.location.origin}${window.location.pathname}?session_id={CHECKOUT_SESSION_ID}&plan_type=${planType}&status=success`,
+        cancelUrl: `${window.location.origin}${window.location.pathname}?plan_type=${planType}&status=cancelled`,
         customerEmail: user.email,
         clientReferenceId: user.id, 
       });
@@ -176,20 +97,36 @@ const PlansPage = ({ setActiveTab }) => {
       toast({ title: "Erro Inesperado", description: "Ocorreu um problema ao tentar iniciar o pagamento.", variant: "destructive" });
     } finally {
       setLoadingStripe(false);
+      setSelectedPlan(null);
     }
   };
 
-  const userCurrentPlanId = contextPlanStatus ? contextPlanStatus.toLowerCase() : (settings?.current_plan_id ? settings.current_plan_id.toLowerCase() : 'trial');
+  const monthlyFeatures = [
+    'Agenda Inteligente com agendamento por link para fechar trabalhos até enquanto você dorme.',
+    'Funil de Vendas para acompanhar cada oportunidade até a conversão.',
+    'Controle Financeiro Avançado para saber exatamente o que entra e sai, sem surpresas.',
+    'Gestão de Clientes Ilimitada, com histórico completo de relacionamento.',
+    'Captação Automática de Leads, Feedbacks e Formulários Personalizados para atrair e nutrir potenciais clientes.',
+    'Geração Instantânea de Contratos com templates prontos e personalizáveis.',
+    'Gestão Completa de Equipamentos com cálculo automático de depreciação e histórico de manutenção.',
+    'Precifique com Segurança usando nosso sistema inteligente para nunca mais cobrar menos do que vale.',
+    'Reservas Inteligentes para garantir datas e fechar mais trabalhos.',
+    'GO.STUDIO – Crie propostas de alto impacto em landing pages profissionais e gere contratos em minutos.',
+    'Quadros Ilimitados no estilo Kanban, anotações, listas e muito mais, salvos e sincronizados 24h por dia.',
+    'Programa de Indicação: traga novos assinantes e receba comissão extra.'
+  ];
 
-  const currentPlanDetails = plansData.find(p => p.id === userCurrentPlanId);
-  const currentPlanTier = currentPlanDetails ? currentPlanDetails.tier : 0;
-  
-  const getPlanIdFromContextStatus = (status) => {
-    if (!status) return 'trial';
-    return status.toLowerCase();
-  }
-  
-  const normalizedUserPlanId = getPlanIdFromContextStatus(contextPlanStatus);
+  const annualBonuses = [
+    'Atendimento VIP por WhatsApp 24/7',
+    'INSPIRA – Central de ideias para ensaios inesquecíveis.',
+    'SEASON – Planejador sazonal para aproveitar datas e oportunidades do ano.',
+    'OPPORTUNE – Mapa de oportunidades fotográficas na sua região.',
+    'GO.MOV – Calculadora real de logística, deslocamento e custos de produção.',
+    'SPOT – Mapa de fornecedores e locações estratégicas.',
+    'RESPOSTAS RÁPIDAS – Kit pronto para agilizar seu atendimento.',
+    'METAS – Simulador de ganhos e metas visuais para manter seu foco.',
+    'RIVAL – Radar de concorrência e mercado para estar sempre à frente.'
+  ];
 
   return (
     <div className="container mx-auto py-12 px-4 md:px-6">
@@ -197,183 +134,225 @@ const PlansPage = ({ setActiveTab }) => {
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-center mb-12"
+        className="text-center mb-16"
       >
-        <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-customPurple to-customGreen mb-3">
-          PLANOS
+        <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-customPurple to-customGreen mb-6">
+          ESCOLHA SEU PLANO
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-          Da sua primeira cliente ao seu estúdio de sucesso, temos o plano perfeito para cada etapa da sua carreira. Organize-se, profissionalize-se e ganhe mais tempo!
+        <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+          Tudo o que um fotógrafo profissional precisa para dominar a gestão e aumentar as vendas
         </p>
       </motion.div>
 
-      <div className="flex justify-center mb-10">
-        <div className="inline-flex rounded-lg shadow-sm bg-background border border-border p-1">
-          <Button
-            onClick={() => setBillingCycle('monthly')}
-            variant={billingCycle === 'monthly' ? 'default' : 'ghost'}
-            className={`px-6 py-2 rounded-md transition-all duration-200 ease-in-out ${billingCycle === 'monthly' ? 'btn-custom-gradient text-white' : 'text-muted-foreground hover:bg-muted/50'}`}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        {/* PLANO MENSAL */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="bg-card rounded-3xl shadow-xl border border-border p-8 flex flex-col relative overflow-hidden"
+        >
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+          
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-foreground mb-2">PLANO PROFISSIONAL</h2>
+            <p className="text-lg text-blue-600 font-semibold">MENSAL</p>
+            <div className="mt-6">
+              <span className="text-5xl font-extrabold text-foreground">R$ 49,90</span>
+              <span className="text-muted-foreground text-lg">/mês</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              Sem compromisso, cancele quando quiser
+            </p>
+          </div>
+
+          <div className="flex-grow">
+            <h3 className="text-lg font-semibold text-foreground mb-6">
+              Tudo o que um fotógrafo profissional precisa para dominar a gestão e aumentar as vendas
+            </h3>
+            
+            <ul className="space-y-4 text-sm mb-8">
+              {monthlyFeatures.map((feature, i) => (
+                <li key={i} className="flex items-start">
+                  <CheckCircle className="w-5 h-5 text-blue-500 mr-3 mt-0.5 shrink-0" />
+                  <span className="text-muted-foreground leading-relaxed">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <Button 
+            onClick={() => handleChoosePlan('monthly', 'price_1RvmtzDORq3T75OLRhl7tGjp')} 
+            disabled={loadingStripe}
+            className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg transition-all duration-300 hover:scale-105"
           >
-            Mensal
+            {loadingStripe && selectedPlan === 'monthly' ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
+              />
+            ) : (
+              <Zap className="w-5 h-5 mr-2" />
+            )}
+            Começar Agora
           </Button>
-          <Button
-            onClick={() => setBillingCycle('yearly')}
-            variant={billingCycle === 'yearly' ? 'default' : 'ghost'}
-            className={`px-6 py-2 rounded-md transition-all duration-200 ease-in-out relative ${billingCycle === 'yearly' ? 'btn-custom-gradient text-white' : 'text-muted-foreground hover:bg-muted/50'}`}
-          >
-            Anual
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full transform rotate-12">
-              ECONOMIZE!
-            </span>
-          </Button>
-        </div>
-      </div>
+        </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {plansData.map((plan, index) => {
-          const isCurrentPlan = plan.id === normalizedUserPlanId;
-          const isUpgrade = plan.tier > currentPlanTier;
-          const isDowngrade = plan.tier < currentPlanTier;
-          const priceId = billingCycle === 'monthly' ? plan.stripePriceIdMonthly : plan.stripePriceIdYearly;
+        {/* PLANO ANUAL PROMOCIONAL */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-3xl shadow-2xl border-2 border-orange-400 p-8 flex flex-col relative overflow-hidden"
+        >
+          {/* Badge de destaque */}
+          <div className="absolute -top-4 -right-4 bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold px-6 py-2 rounded-full transform rotate-12 shadow-lg">
+            <Timer className="w-4 h-4 inline mr-1" />
+            OFERTA LIMITADA
+          </div>
           
-          const displayPrice = billingCycle === 'monthly' 
-            ? plan.priceMonthly 
-            : (plan.promoActive ? (parseFloat(plan.priceYearlyDiscounted) / 12).toFixed(2).replace('.',',') : (parseFloat(plan.priceYearlyOriginal) / 12).toFixed(2).replace('.',','));
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-500 to-red-500"></div>
           
-          const yearlyPriceText = billingCycle === 'yearly' 
-            ? (plan.promoActive ? `R$ ${plan.priceYearlyDiscounted}` : `R$ ${plan.priceYearlyOriginal}`)
-            : '';
-
-
-          let buttonText = "Escolher Plano";
-          let buttonAction = () => handleChoosePlan(plan.id, priceId);
-          let buttonDisabled = loadingStripe || !priceId;
-          let buttonVariant = "default";
-
-          if (isCurrentPlan) {
-            buttonText = "Seu Plano Atual";
-            buttonDisabled = true;
-            buttonVariant = "outline";
-          } else if (isUpgrade) {
-            buttonText = "Fazer Upgrade";
-          } else if (isDowngrade) {
-            buttonText = "Fazer Downgrade";
-            buttonDisabled = true; 
-          }
-          
-          return (
-            <motion.div
-              key={plan.id}
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
-              className={`bg-card rounded-2xl shadow-2xl border ${isCurrentPlan ? 'border-customPurple dark:border-customGreen ring-2 ring-customPurple dark:ring-customGreen' : (plan.recommended ? 'border-customGreen' : 'border-border')} p-8 flex flex-col relative overflow-hidden`}
-            >
-              {plan.recommended && !isCurrentPlan && (
-                <div className="absolute top-0 right-0 bg-customGreen text-white text-xs font-bold px-4 py-1 rounded-bl-lg flex items-center">
-                  <Star className="w-3 h-3 mr-1 fill-current" /> RECOMENDADO
-                </div>
-              )}
-              {isCurrentPlan && (
-                 <div className="absolute top-0 right-0 bg-customPurple dark:bg-customGreen text-white text-xs font-bold px-4 py-1 rounded-bl-lg flex items-center">
-                  <ShieldCheck className="w-3 h-3 mr-1 fill-current" /> PLANO ATUAL
-                </div>
-              )}
-              {billingCycle === 'yearly' && plan.promoActive && (
-                 <Badge variant="destructive" className="absolute top-10 right-3 transform -translate-y-1/2 bg-red-500 text-white py-1 px-2.5">
-                   <Percent className="w-3 h-3 mr-1" /> 50% OFF
-                 </Badge>
-              )}
-
-              <div className="flex-grow">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-customPurple dark:text-customGreen mb-1">{plan.name}</h3>
-                <p className="text-muted-foreground text-sm mb-4">{plan.tagline}</p>
-                
-                <div className="mb-6">
-                  {billingCycle === 'yearly' && plan.promoActive && (
-                    <del className="text-xl text-muted-foreground/70 block">
-                      R$ {(parseFloat(plan.priceYearlyOriginal) / 12).toFixed(2).replace('.',',')}
-                    </del>
-                  )}
-                  <span className="text-4xl font-extrabold text-foreground">
-                    R$ {displayPrice}
-                  </span>
-                  <span className="text-muted-foreground"> /mês</span>
-
-                  {billingCycle === 'yearly' && (
-                    <p className="text-xs text-customGreen font-medium mt-1">
-                      Cobrado {yearlyPriceText} anualmente
-                      {plan.promoActive && <span className="ml-1 text-muted-foreground">(Preço original: R$ {plan.priceYearlyOriginal})</span>}
-                    </p>
-                  )}
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-6 h-16">{plan.description}</p>
-
-                <ul className="space-y-3 text-sm mb-8">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start">
-                      <CheckCircle className="w-5 h-5 text-customGreen mr-3 mt-0.5 shrink-0" />
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {plan.id === 'studio_pro' && billingCycle === 'yearly' && plan.exclusiveBonuses && plan.exclusiveBonuses.length > 0 && (
-                  <div className="my-6 pt-4 border-t border-border">
-                    <h4 className="text-sm font-semibold text-customPurple dark:text-customGreen mb-3 flex items-center">
-                      <Gift className="w-4 h-4 mr-2"/> Bônus Exclusivos Inclusos:
-                    </h4>
-                    <ul className="space-y-2 text-sm">
-                      {plan.exclusiveBonuses.map((bonus, i) => (
-                        <li key={i} className="flex items-start">
-                          <CheckCircle className="w-4 h-4 text-yellow-500 mr-2 mt-0.5 shrink-0" />
-                          <span className="text-muted-foreground">{bonus}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <Crown className="w-8 h-8 text-orange-500 mr-2" />
+              <h2 className="text-2xl font-bold text-foreground">PLANO PROFISSIONAL</h2>
+            </div>
+            <p className="text-lg text-orange-600 font-semibold">ANUAL PROMOCIONAL</p>
+            
+            <div className="mt-6 space-y-2">
+              <div className="flex items-center justify-center space-x-4">
+                <span className="text-2xl text-muted-foreground line-through">R$ 598,80</span>
+                <Badge className="bg-red-500 text-white px-3 py-1">
+                  67% OFF
+                </Badge>
               </div>
+              <div>
+                <span className="text-5xl font-extrabold text-orange-600">R$ 197,90</span>
+                <span className="text-muted-foreground text-lg">/ano</span>
+              </div>
+              <p className="text-sm text-orange-600 font-semibold">
+                💡 O plano que paga por si mesmo em um único trabalho
+              </p>
+            </div>
+          </div>
 
-              <Button 
-                onClick={buttonAction} 
-                disabled={buttonDisabled}
-                className={`w-full py-3 text-base font-semibold shadow-lg transition-transform duration-150 ease-in-out hover:scale-105 
-                  ${isCurrentPlan ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'btn-custom-gradient text-white'} 
-                  ${buttonVariant === "outline" && !isCurrentPlan ? 'border-primary text-primary hover:bg-primary/10' : ''}
-                `}
-              >
-                {loadingStripe && !isCurrentPlan ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                  />
-                ) : (
-                  plan.id === 'starter' ? <Zap className="w-5 h-5 mr-2" /> : <Gem className="w-5 h-5 mr-2" />
-                )}
-                {buttonText}
-              </Button>
-              {billingCycle === 'yearly' && plan.yearlySavings && (
-                <p className="text-xs text-center mt-4 text-customGreen">{plan.yearlySavings}</p>
+          <div className="flex-grow">
+            <div className="bg-white/50 dark:bg-black/20 rounded-2xl p-6 mb-6">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                <Sparkles className="w-5 h-5 text-orange-500 mr-2" />
+                Tudo do plano mensal + benefícios exclusivos:
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <MessageCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5 shrink-0" />
+                  <span className="text-sm text-muted-foreground font-medium">
+                    Atendimento VIP por WhatsApp 24/7
+                  </span>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-semibold text-orange-600 mb-3 flex items-center">
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    Acesso Antecipado às novas funcionalidades revolucionárias:
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    {annualBonuses.map((bonus, i) => (
+                      <li key={i} className="flex items-start">
+                        <ArrowRight className="w-4 h-4 text-orange-500 mr-2 mt-0.5 shrink-0" />
+                        <span className="text-muted-foreground">{bonus}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-xl p-4 mb-6">
+              <p className="text-sm text-center font-semibold text-orange-700 dark:text-orange-300">
+                💡 Oferta por tempo limitado – Depois que acabar, o preço volta ao normal.<br/>
+                📈 Invista R$ 197,90 e transforme sua forma de trabalhar durante o ano inteiro.
+              </p>
+            </div>
+          </div>
+
+          <Button 
+            onClick={() => handleChoosePlan('annual', 'price_1RvmtzDORq3T75OLVIfIicv5')} 
+            disabled={loadingStripe}
+            className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg transition-all duration-300 hover:scale-105 relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 animate-pulse"></div>
+            <div className="relative flex items-center justify-center">
+              {loadingStripe && selectedPlan === 'annual' ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
+                />
+              ) : (
+                <Crown className="w-5 h-5 mr-2" />
               )}
-               {(!STRIPE_PUBLISHABLE_KEY || !priceId) && !isCurrentPlan && (
-                <p className="text-xs text-center mt-3 text-red-500">Configuração de pagamento pendente para este plano/ciclo.</p>
-              )}
-            </motion.div>
-          );
-        })}
+              Garantir Oferta Especial
+            </div>
+          </Button>
+          
+          <p className="text-xs text-center mt-4 text-orange-600 font-medium">
+            ⚠️ Esta oferta promocional não pode ser parcelada. Preço especial apenas para novas assinaturas.
+          </p>
+        </motion.div>
       </div>
+
+      {/* Seção de esclarecimentos */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.6 }}
+        className="mt-16 max-w-4xl mx-auto"
+      >
+        <div className="bg-muted/50 rounded-2xl p-8">
+          <h3 className="text-xl font-semibold text-center mb-6 flex items-center justify-center">
+            <Lock className="w-5 h-5 mr-2 text-customPurple" />
+            Informações Importantes
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-muted-foreground">
+            <div>
+              <h4 className="font-semibold text-foreground mb-2">Plano Mensal:</h4>
+              <ul className="space-y-1">
+                <li>• R$ 49,90 por mês</li>
+                <li>• Sem compromisso anual</li>
+                <li>• Cancele quando quiser</li>
+                <li>• Upgrade para anual: R$ 598,80</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-foreground mb-2">Plano Anual Promocional:</h4>
+              <ul className="space-y-1">
+                <li>• R$ 197,90 (apenas primeira assinatura)</li>
+                <li>• Renovação: R$ 598,80/ano (parcelável em 12x)</li>
+                <li>• Não parcelável na promoção</li>
+                <li>• Benefícios exclusivos inclusos</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </motion.div>
       
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-16 text-center"
+        transition={{ delay: 1 }}
+        className="mt-12 text-center"
       >
-        <p className="text-muted-foreground">Dúvidas? <a href="mailto:suporte@gofotografo.com" className="text-customPurple dark:text-customGreen font-medium hover:underline">Fale conosco</a>.</p>
-        <p className="text-xs text-muted-foreground mt-2">Todos os planos incluem atualizações contínuas e acesso a novas funcionalidades conforme são lançadas.</p>
+        <p className="text-muted-foreground">
+          Dúvidas? <a href="mailto:suporte@gofotografo.com" className="text-customPurple dark:text-customGreen font-medium hover:underline">Fale conosco</a>.
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Pagamentos processados com segurança pela Stripe. Todos os planos incluem atualizações contínuas.
+        </p>
       </motion.div>
     </div>
   );
